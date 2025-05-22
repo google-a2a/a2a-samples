@@ -109,7 +109,3 @@ The agent uses AutoGen to orchestrate interactions between:
 
 - An assistant agent that interprets user queries
 - A user proxy agent with the exchange rate tool function
-
-## License
-
-MIT
