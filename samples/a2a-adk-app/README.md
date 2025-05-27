@@ -44,11 +44,6 @@ AIR_AGENT_URL=http://localhost:10002
 WEA_AGENT_URL=http://localhost:10001
 ```
 
-## Install SDK
-Go to `a2a-adk-app` folder in terminal:
-```bash
-uv sync
-```
 
 
 ## 1. Run Airbnb server
