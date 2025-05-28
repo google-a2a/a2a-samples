@@ -137,6 +137,7 @@ const movieAgentCard: schema.AgentCard = {
   url: "http://localhost:41241", // Default port used in the script
   provider: {
     organization: "A2A Samples",
+    url: "https://github.com/google-a2a/a2a-samples"
   },
   version: "0.0.1",
   capabilities: {
