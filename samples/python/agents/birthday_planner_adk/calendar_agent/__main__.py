@@ -53,47 +53,47 @@ class InsecureJWTAuthBackend(AuthenticationBackend):
     ) -> tuple[AuthCredentials, BaseUser] | None:
         # For illustrative purposes only: please validate your JWTs!
         with contextlib.suppress(Exception):
-            auth_header = conn.headers["Authorization"]
-            jwt = auth_header.split("Bearer ")[1]
-            jwt_claims = jwt.split(".")[1]
+            auth_header = conn.headers['Authorization']
+            jwt = auth_header.split('Bearer ')[1]
+            jwt_claims = jwt.split('.')[1]
             missing_padding = len(jwt_claims) % 4
             if missing_padding:
-                jwt_claims += "=" * (4 - missing_padding)
-            payload = base64.urlsafe_b64decode(jwt_claims).decode("utf-8")
+                jwt_claims += '=' * (4 - missing_padding)
+            payload = base64.urlsafe_b64decode(jwt_claims).decode('utf-8')
             parsed_payload = json.loads(payload)
-            return AuthCredentials([]), SimpleUser(parsed_payload["sub"])
+            return AuthCredentials([]), SimpleUser(parsed_payload['sub'])
         return None
 
 
 @click.command()
-@click.option("--host", "host", default="localhost")
-@click.option("--port", "port", default=10007)
+@click.option('--host', 'host', default='localhost')
+@click.option('--port', 'port', default=10007)
 def main(host: str, port: int):
     # Verify an API key is set.
     # Not required if using Vertex AI APIs.
-    if os.getenv("GOOGLE_GENAI_USE_VERTEXAI") != "TRUE" and not os.getenv(
-        "GOOGLE_API_KEY"
+    if os.getenv('GOOGLE_GENAI_USE_VERTEXAI') != 'TRUE' and not os.getenv(
+        'GOOGLE_API_KEY'
     ):
         raise ValueError(
-            "GOOGLE_API_KEY environment variable not set and "
-            "GOOGLE_GENAI_USE_VERTEXAI is not TRUE."
+            'GOOGLE_API_KEY environment variable not set and '
+            'GOOGLE_GENAI_USE_VERTEXAI is not TRUE.'
         )
 
     skill = AgentSkill(
-        id="check_availability",
-        name="Check Availability",
+        id='check_availability',
+        name='Check Availability',
         description="Checks a user's availability for a time using their Google Calendar",
-        tags=["calendar"],
-        examples=["Am I free from 10am to 11am tomorrow?"],
+        tags=['calendar'],
+        examples=['Am I free from 10am to 11am tomorrow?'],
     )
 
     agent_card = AgentCard(
-        name="Calendar Agent",
+        name='Calendar Agent',
         description="An agent that can manage a user's calendar",
-        url=f"http://{host}:{port}/",
-        version="1.0.0",
-        defaultInputModes=["text"],
-        defaultOutputModes=["text"],
+        url=f'http://{host}:{port}/',
+        version='1.0.0',
+        defaultInputModes=['text'],
+        defaultOutputModes=['text'],
         capabilities=AgentCapabilities(streaming=True),
         skills=[skill],
         securitySchemes=[],
@@ -101,8 +101,8 @@ def main(host: str, port: int):
 
     adk_agent = asyncio.run(
         create_agent(
-            client_id=os.getenv("GOOGLE_CLIENT_ID"),
-            client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+            client_id=os.getenv('GOOGLE_CLIENT_ID'),
+            client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
         )
     )
     runner = Runner(
@@ -116,9 +116,9 @@ def main(host: str, port: int):
 
     async def handle_auth(request: Request) -> PlainTextResponse:
         await agent_executor.on_auth_callback(
-            str(request.query_params.get("state")), str(request.url)
+            str(request.query_params.get('state')), str(request.url)
         )
-        return PlainTextResponse("Authentication successful.")
+        return PlainTextResponse('Authentication successful.')
 
     request_handler = DefaultRequestHandler(
         agent_executor=agent_executor, task_store=InMemoryTaskStore()
@@ -130,20 +130,22 @@ def main(host: str, port: int):
     routes = a2a_app.routes()
     routes.append(
         Route(
-            path="/authenticate",
-            methods=["GET"],
+            path='/authenticate',
+            methods=['GET'],
             endpoint=handle_auth,
         )
     )
     app = Starlette(
         routes=routes,
         middleware=[
-            Middleware(AuthenticationMiddleware, backend=InsecureJWTAuthBackend())
+            Middleware(
+                AuthenticationMiddleware, backend=InsecureJWTAuthBackend()
+            )
         ],
     )
 
     uvicorn.run(app, host=host, port=port)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
