@@ -1,14 +1,17 @@
 # mypy: ignore-errors
 import asyncio
 import logging
+import time
 
-from collections import namedtuple
-from collections.abc import AsyncGenerator
-from urllib.parse import parse_qs, urlparse
+from typing import NamedTuple
 
 from google.adk import Runner
-from google.adk.auth import AuthConfig
-from google.adk.events import Event
+from google.adk.auth import AuthConfig, AuthCredential, AuthScheme
+from google.adk.events import Event, EventActions
+from google.adk.sessions import Session
+from google.adk.tools.openapi_tool.openapi_spec_parser.tool_auth_handler import (
+    ToolContextCredentialStore,
+)
 from google.genai import types
 
 from a2a.server.agent_execution import AgentExecutor
@@ -32,10 +35,23 @@ from a2a.utils.message import new_agent_text_message
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-ADKAuthDetails = namedtuple(
-    'ADKAuthDetails',
-    ['state', 'uri', 'future', 'auth_config', 'auth_request_function_call_id'],
-)
+
+class ADKAuthDetails(NamedTuple):
+    """Contains a collection of properties related to handling ADK authentication."""
+
+    state: str
+    uri: str
+    future: asyncio.Future
+    auth_config: AuthConfig
+    auth_request_function_call_id: str
+
+
+class StoredCredential(NamedTuple):
+    """Contains OAuth2 credentials."""
+
+    key: str
+    credential: AuthCredential
+
 
 # 1 minute timeout to keep the demo moving.
 auth_receive_timeout_seconds = 60
@@ -45,32 +61,25 @@ class ADKAgentExecutor(AgentExecutor):
     """An AgentExecutor that runs an ADK-based Agent."""
 
     _awaiting_auth: dict[str, asyncio.Future]
+    _credentials: dict[str, StoredCredential]
 
     def __init__(self, runner: Runner, card: AgentCard):
         self.runner = runner
         self._card = card
         self._awaiting_auth = {}
-        self._running_sessions = {}
-
-    def _run_agent(
-        self, session_id, new_message: types.Content
-    ) -> AsyncGenerator[Event]:
-        return self.runner.run_async(
-            session_id=session_id, user_id='self', new_message=new_message
-        )
+        self._credentials = {}
 
     async def _process_request(
         self,
         new_message: types.Content,
-        session_id: str,
+        context: RequestContext,
         task_updater: TaskUpdater,
     ) -> None:
-        session = await self._upsert_session(
-            session_id,
-        )
-        session_id = session.id
+        session = await self._upsert_session(context)
         auth_details = None
-        async for event in self._run_agent(session_id, new_message):
+        async for event in self.runner.run_async(
+            session_id=session.id, user_id=session.user_id, new_message=new_message
+        ):
             # This agent is expected to do one of two things:
             # 1. Ask follow-up questions.
             # 2. Call the calendar tool and interpret the results.
@@ -79,20 +88,14 @@ class ADKAgentExecutor(AgentExecutor):
             # 2. The function call required authorization.
             # Ideally we'd have a way to interpret whether the response is a completion for the
             # task or requires follow-up, but I'm not going to bother just yet.
-            if auth_request_function_call := get_auth_request_function_call(
-                event
-            ):
+            if auth_request_function_call := get_auth_request_function_call(event):
                 # Gather details, then suspend.
-                auth_details = self._prepare_auth_request(
-                    auth_request_function_call
-                )
-                logger.debug(
-                    'Yielding auth required response: %s', auth_details.uri
-                )
+                auth_details = self._prepare_auth_request(auth_request_function_call)
+                logger.debug("Yielding auth required response: %s", auth_details.uri)
                 task_updater.update_status(
                     TaskState.auth_required,
                     message=new_agent_text_message(
-                        f'Authorization is required to continue. Visit {auth_details.uri}'
+                        f"Authorization is required to continue. Visit {auth_details.uri}"
                     ),
                 )
                 # Break out of event handling loop -- no more work will be done until the authorization
@@ -100,12 +103,12 @@ class ADKAgentExecutor(AgentExecutor):
                 break
             if event.is_final_response():
                 parts = convert_genai_parts_to_a2a(event.content.parts)
-                logger.debug('Yielding final response: %s', parts)
+                logger.debug("Yielding final response: %s", parts)
                 task_updater.add_artifact(parts)
                 task_updater.complete()
                 break
             if not event.get_function_calls():
-                logger.debug('Yielding update response')
+                logger.debug("Yielding update response")
                 task_updater.update_status(
                     TaskState.working,
                     message=task_updater.new_agent_message(
@@ -113,13 +116,11 @@ class ADKAgentExecutor(AgentExecutor):
                     ),
                 )
             else:
-                logger.debug('Skipping event')
+                logger.debug("Skipping event")
 
         if auth_details:
             # After auth is received, we can continue processing this request.
-            await self._complete_auth_processing(
-                session_id, auth_details, task_updater
-            )
+            await self._complete_auth_processing(context, auth_details, task_updater)
 
     def _prepare_auth_request(
         self, auth_request_function_call: types.FunctionCall
@@ -128,27 +129,23 @@ class ADKAgentExecutor(AgentExecutor):
         # https://google.github.io/adk-docs/tools/authentication/#2-handling-the-interactive-oauthoidc-flow-client-side
         if not (auth_request_function_call_id := auth_request_function_call.id):
             raise ValueError(
-                f'Cannot get function call id from function call: {auth_request_function_call}'
+                f"Cannot get function call id from function call: {auth_request_function_call}"
             )
         auth_config = get_auth_config(auth_request_function_call)
         if not (auth_config and auth_request_function_call_id):
             raise ValueError(
-                f'Cannot get auth config from function call: {auth_request_function_call}'
+                f"Cannot get auth config from function call: {auth_request_function_call}"
             )
         oauth2_config = auth_config.exchanged_auth_credential.oauth2
         base_auth_uri = oauth2_config.auth_uri
         if not base_auth_uri:
-            raise ValueError(
-                f'Cannot get auth uri from auth config: {auth_config}'
-            )
-        redirect_uri = f'{self._card.url}authenticate'
+            raise ValueError(f"Cannot get auth uri from auth config: {auth_config}")
+        redirect_uri = f"{self._card.url}authenticate"
         oauth2_config.redirect_uri = redirect_uri
-        parsed_auth_uri = urlparse(base_auth_uri)
-        query_params_dict = parse_qs(parsed_auth_uri.query)
-        state_token = query_params_dict['state'][0]
+        state_token = oauth2_config.state
         future = asyncio.get_running_loop().create_future()
         self._awaiting_auth[state_token] = future
-        auth_request_uri = base_auth_uri + f'&redirect_uri={redirect_uri}'
+        auth_request_uri = base_auth_uri + f"&redirect_uri={redirect_uri}"
         return ADKAuthDetails(
             state=state_token,
             uri=auth_request_uri,
@@ -159,49 +156,54 @@ class ADKAgentExecutor(AgentExecutor):
 
     async def _complete_auth_processing(
         self,
-        session_id: str,
+        context: RequestContext,
         auth_details: ADKAuthDetails,
         task_updater: TaskUpdater,
     ) -> None:
-        logger.debug('Waiting for auth event')
+        logger.debug("Waiting for auth event")
         try:
             auth_uri = await asyncio.wait_for(
                 auth_details.future, timeout=auth_receive_timeout_seconds
             )
         except TimeoutError:
-            logger.debug('Timed out waiting for auth, marking task as failed')
+            logger.debug("Timed out waiting for auth, marking task as failed")
             task_updater.update_status(
                 TaskState.failed,
                 message=new_agent_text_message(
-                    'Timed out waiting for authorization.',
-                    context_id=session_id,
+                    "Timed out waiting for authorization.",
+                    context_id=context.context_id,
                 ),
             )
             return
-        logger.debug('Auth received, continuing')
+        logger.debug("Auth received, continuing")
         task_updater.update_status(
             TaskState.working,
             message=new_agent_text_message(
-                'Auth received, continuing...', context_id=session_id
+                "Auth received, continuing...", context_id=context.context_id
             ),
         )
         del self._awaiting_auth[auth_details.state]
-        oauth2_config = (
-            auth_details.auth_config.exchanged_auth_credential.oauth2
-        )
+        oauth2_config = auth_details.auth_config.exchanged_auth_credential.oauth2
         oauth2_config.auth_response_uri = auth_uri
         auth_content = types.UserContent(
             parts=[
                 types.Part(
                     function_response=types.FunctionResponse(
                         id=auth_details.auth_request_function_call_id,
-                        name='adk_request_credential',
+                        name="adk_request_credential",
                         response=auth_details.auth_config.model_dump(),
                     ),
                 )
             ]
         )
-        await self._process_request(auth_content, session_id, task_updater)
+        await self._process_request(auth_content, context, task_updater)
+        # Extract the stored credential.
+        if context.call_context and context.call_context.user.is_authenticated:
+            await self._store_user_auth(
+                context,
+                auth_details.auth_config.auth_scheme,
+                auth_details.auth_config.raw_auth_credential,
+            )
 
     async def execute(
         self,
@@ -218,10 +220,10 @@ class ADKAgentExecutor(AgentExecutor):
             types.UserContent(
                 parts=convert_a2a_parts_to_genai(context.message.parts),
             ),
-            context.context_id,
+            context,
             updater,
         )
-        logger.debug('[Calendar] execute exiting')
+        logger.debug("[Calendar] execute exiting")
 
     async def cancel(self, context: RequestContext, event_queue: EventQueue):
         # Ideally: kill any ongoing tasks.
@@ -230,12 +232,64 @@ class ADKAgentExecutor(AgentExecutor):
     async def on_auth_callback(self, state: str, uri: str):
         self._awaiting_auth[state].set_result(uri)
 
-    async def _upsert_session(self, session_id: str):
-        return await self.runner.session_service.get_session(
-            app_name=self.runner.app_name, user_id='self', session_id=session_id
+    async def _upsert_session(self, context: RequestContext) -> Session:
+        user_id = "anonymous"
+        if context.call_context and context.call_context.user.is_authenticated:
+            user_id = context.call_context.user.user_name
+        session = await self.runner.session_service.get_session(
+            app_name=self.runner.app_name,
+            user_id=user_id,
+            session_id=context.context_id,
         ) or await self.runner.session_service.create_session(
-            app_name=self.runner.app_name, user_id='self', session_id=session_id
+            app_name=self.runner.app_name,
+            user_id=user_id,
+            session_id=context.context_id,
         )
+        return await self._ensure_auth(session)
+
+    async def _ensure_auth(self, session: Session) -> Session:
+        if (
+            stored_cred := self._credentials.get(session.user_id)
+        ) and not session.state.get(stored_cred.key):
+            event_action = EventActions(
+                state_delta={
+                    stored_cred.key: stored_cred.credential,
+                }
+            )
+            event = Event(
+                invocation_id="preload_auth",
+                author="system",
+                actions=event_action,
+                timestamp=time.time(),
+            )
+            logger.debug("Loaded authorization state: %s", event)
+            await self.runner.session_service.append_event(session, event)
+        return session
+
+    async def _store_user_auth(
+        self,
+        context: RequestContext,
+        auth_scheme: AuthScheme,
+        raw_credential: AuthCredential,
+    ) -> None:
+        # This reaches into some _deep_ implementation details about the
+        # Google API toolsets. We're going to reach into the session state
+        # and pull out the credential stored by the tool, hoist that into
+        # our per-user credential store. Later, we'll load new sessions
+        # for this user with this special credential key.
+        session = await self._upsert_session(context)
+        # ToolContextCredentialStore doesn't require the tool context to
+        # get the credential key, so we can just pass None (yikes).
+        tool_credential_store = ToolContextCredentialStore(None)
+        credential_key = tool_credential_store.get_credential_key(
+            auth_scheme,
+            raw_credential,
+        )
+        stored_credential = session.state.get(credential_key)
+        if stored_credential:
+            self._credentials[context.call_context.user.user_name] = StoredCredential(
+                key=credential_key, credential=stored_credential
+            )
 
 
 def convert_a2a_parts_to_genai(parts: list[Part]) -> list[types.Part]:
@@ -261,8 +315,8 @@ def convert_a2a_part_to_genai(part: Part) -> types.Part:
                     data=part.file.bytes, mime_type=part.file.mime_type
                 )
             )
-        raise ValueError(f'Unsupported file type: {type(part.file)}')
-    raise ValueError(f'Unsupported part type: {type(part)}')
+        raise ValueError(f"Unsupported file type: {type(part.file)}")
+    raise ValueError(f"Unsupported part type: {type(part)}")
 
 
 def convert_genai_parts_to_a2a(parts: list[types.Part]) -> list[Part]:
@@ -294,7 +348,7 @@ def convert_genai_part_to_a2a(part: types.Part) -> Part:
                 )
             )
         )
-    raise ValueError(f'Unsupported part type: {part}')
+    raise ValueError(f"Unsupported part type: {part}")
 
 
 def get_auth_request_function_call(event: Event) -> types.FunctionCall:
@@ -305,7 +359,7 @@ def get_auth_request_function_call(event: Event) -> types.FunctionCall:
         if (
             part
             and part.function_call
-            and part.function_call.name == 'adk_request_credential'
+            and part.function_call.name == "adk_request_credential"
             and event.long_running_tool_ids
             and part.function_call.id in event.long_running_tool_ids
         ):
@@ -318,9 +372,9 @@ def get_auth_config(
 ) -> AuthConfig:
     """Extracts the AuthConfig object from the arguments of the auth request function call."""
     if not auth_request_function_call.args or not (
-        auth_config := auth_request_function_call.args.get('authConfig')
+        auth_config := auth_request_function_call.args.get("authConfig")
     ):
         raise ValueError(
-            f'Cannot get auth config from function call: {auth_request_function_call}'
+            f"Cannot get auth config from function call: {auth_request_function_call}"
         )
     return AuthConfig.model_validate(auth_config)
