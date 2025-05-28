@@ -75,6 +75,7 @@ async def main() -> None:
             },
         }
         request = SendMessageRequest(
+            id=str(uuid4()),
             params=MessageSendParams(**send_message_payload)
         )
 
@@ -82,6 +83,7 @@ async def main() -> None:
         print(response.model_dump(mode='json', exclude_none=True))
        
         streaming_request = SendStreamingMessageRequest(
+                id=str(uuid4()),
                 params=MessageSendParams(**send_message_payload)
             )
 

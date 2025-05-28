@@ -53,7 +53,7 @@ async def run_single_turn_test(client: A2AClient) -> None:
     send_payload = create_send_message_payload(
         text='Please tell me weather in LA, CA'
     )
-    request = SendMessageRequest(params=MessageSendParams(**send_payload))
+    request = SendMessageRequest(id=str(uuid4()), params=MessageSendParams(**send_payload))
 
     print('--- Single Turn Request ---')
     # Send Message
@@ -70,7 +70,7 @@ async def run_single_turn_test(client: A2AClient) -> None:
     task_id: str = send_response.root.result.id
     print('---Query Task---')
     # query the task
-    get_request = GetTaskRequest(params=TaskQueryParams(id=task_id))
+    get_request = GetTaskRequest(id=str(uuid4()), params=TaskQueryParams(id=task_id))
     get_response: GetTaskResponse = await client.get_task(get_request)
     print_json_response(get_response, 'Query Task Response')
 

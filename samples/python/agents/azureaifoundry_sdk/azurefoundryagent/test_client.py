@@ -155,6 +155,7 @@ async def main() -> None:
             try:
                 # Test regular message sending
                 request = SendMessageRequest(
+                    id=str(uuid4()),
                     params=MessageSendParams(**send_message_payload)
                 )
                 
@@ -165,6 +166,7 @@ async def main() -> None:
                 # Test streaming message sending
                 logger.info("🌊 Testing streaming response...")
                 streaming_request = SendStreamingMessageRequest(
+                    id=str(uuid4()),
                     params=MessageSendParams(**send_message_payload)
                 )
                 
