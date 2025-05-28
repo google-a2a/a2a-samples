@@ -148,7 +148,7 @@ class OrchestratorAgent(BaseAgent):
                 context_id=context_id,
             )
             # Resume workflow, used when the workflow nodes are updated.
-            resume_workflow = False
+            should_resume_workflow = False
             async for chunk in self.graph.run_workflow(
                 start_node_id=start_node_id
             ):
@@ -186,7 +186,7 @@ class OrchestratorAgent(BaseAgent):
                                     self.set_node_attributes(
                                         node_id=start_node_id, query=query
                                     )
-                                    resume_workflow = True
+                                    should_resume_workflow = True
                             except Exception:
                                 logger.info("Cannot convert answer data")
 
@@ -218,7 +218,7 @@ class OrchestratorAgent(BaseAgent):
                                 # Restart graph from the newly inserted subgraph state
                                 # Start from the new node just created.
                                 if idx == 0:
-                                    resume_workflow = True
+                                    should_resume_workflow = True
                                     start_node_id = node.id
                         else:
                             # Not planner but artifacts from other tasks,
@@ -227,14 +227,19 @@ class OrchestratorAgent(BaseAgent):
                             # a summary is shown at the end of the workflow.
                             continue
                 # When the workflow needs to be resumed, do not yield partial.
-                if not resume_workflow:
+                if not should_resume_workflow:
                     logger.info("No workflow resume detected, yielding chunk")
                     # Yield partial execution
                     yield chunk
             # The graph is complete and no updates, so okay to break from the loop.
-            if not resume_workflow:
-                logger.info("Breaking from the while loop")
+            if not should_resume_workflow:
+                logger.info(
+                    "Workflow iteration complete and no restart requested. Exiting main loop."
+                )
                 break
+            else:
+                # Readable logs
+                logger.info("Restarting workflow loop.")
         if self.graph.state == Status.COMPLETED:
             # All individual actions complete, now generate the summary
             logger.info(f"Generating summary for {len(self.results)} results")
