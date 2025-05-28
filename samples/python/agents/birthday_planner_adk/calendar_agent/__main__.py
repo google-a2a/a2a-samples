@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import contextlib
 import json
@@ -99,11 +98,9 @@ def main(host: str, port: int):
         securitySchemes=[],
     )
 
-    adk_agent = asyncio.run(
-        create_agent(
-            client_id=os.getenv('GOOGLE_CLIENT_ID'),
-            client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
-        )
+    adk_agent = create_agent(
+        client_id=os.getenv('GOOGLE_CLIENT_ID'),
+        client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
     )
     runner = Runner(
         app_name=agent_card.name,
