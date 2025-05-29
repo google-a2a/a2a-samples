@@ -59,7 +59,8 @@ def main(host, port):
             tags=['generate image', 'edit image'],
             examples=['Generate a photorealistic image of raspberry lemonade'],
         )
-
+        
+        agent_card_host = os.getenv("HOST_OVERRIDE") if os.getenv("HOST_OVERRIDE") else host
         agent_card = AgentCard(
             name='Image Generator Agent',
             description=(
@@ -67,7 +68,7 @@ def main(host, port):
                 ' powerful editing capabilities to modify, enhance, or completely'
                 ' transform visuals.'
             ),
-            url=f'http://{host}:{port}/',
+            url=f'http://{agent_card_host}:{port}/',
             version='1.0.0',
             defaultInputModes=ImageGenerationAgent.SUPPORTED_CONTENT_TYPES,
             defaultOutputModes=ImageGenerationAgent.SUPPORTED_CONTENT_TYPES,
