@@ -1,5 +1,4 @@
 import asyncio
-import json
 import logging
 import os
 import time
@@ -8,11 +7,6 @@ from typing import Any, AsyncIterable
 
 import google.auth
 from google import genai
-from google.adk.agents.llm_agent import LlmAgent
-from google.adk.artifacts import InMemoryArtifactService # Kept for ADK structure consistency
-from google.adk.memory.in_memory_memory_service import InMemoryMemoryService # Kept
-from google.adk.runners import Runner # Kept
-from google.adk.sessions import InMemorySessionService # Kept
 from google.cloud import storage
 from urllib.parse import urlparse
 from google.genai import types as genai_types
@@ -87,33 +81,7 @@ class VideoGenerationAgent:
         else:
             logger.info("No SIGNER_SERVICE_ACCOUNT_EMAIL set. Will use ambient gcloud credentials for signing GCS URLs.")
 
-
-        self._agent_llm = self._build_llm_agent()
-        self._user_id = 'video_generation_adk_user' # Static user ID for ADK session context
-        self._runner = Runner(
-            app_name=self._agent_llm.name,
-            agent=self._agent_llm,
-            artifact_service=InMemoryArtifactService(),
-            session_service=InMemorySessionService(),
-            memory_service=InMemoryMemoryService(),
-        )
         logger.info("VideoGenerationAgent initialized.")
-
-    def _build_llm_agent(self) -> LlmAgent:
-        """Builds LLM agent"""
-        return LlmAgent(
-            model='gemini-2.0-flash-001',
-            name='video_generation_orchestrator',
-            description='This agent orchestrates video generation from text prompts using VEO.',
-            instruction="""\
-            You are an assistant that helps kick off video generation tasks.
-            When a user provides a prompt for a video, acknowledge the request
-            and state that the video generation process will begin.
-            The actual video generation and progress updates are handled by the system.
-            Do not attempt to generate the video yourself or call any tools.
-            """,
-            tools=[],
-        )
 
     async def _generate_signed_url(self, blob_name: str, bucket_name: str, expiration_seconds: int) -> str:
 
