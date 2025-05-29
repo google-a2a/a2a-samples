@@ -1,10 +1,6 @@
-# --8<-- [start:HelloWorldAgentExecutor_init]
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.utils import new_agent_text_message
-
-
-# --8<-- [end:HelloWorldAgentExecutor_init]
 
 
 # --8<-- [start:HelloWorldAgent]
@@ -12,7 +8,7 @@ class HelloWorldAgent:
     """Hello World Agent."""
 
     async def invoke(self) -> str:
-        return 'Hello World'
+        return "Hello World"
 
 
 # --8<-- [end:HelloWorldAgent]
@@ -38,9 +34,7 @@ class HelloWorldAgentExecutor(AgentExecutor):
     # --8<-- [end:HelloWorldAgentExecutor_execute]
 
     # --8<-- [start:HelloWorldAgentExecutor_cancel]
-    async def cancel(
-        self, context: RequestContext, event_queue: EventQueue
-    ) -> None:
-        raise Exception('cancel not supported')
+    async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
+        raise Exception("cancel not supported")
 
     # --8<-- [end:HelloWorldAgentExecutor_cancel]
