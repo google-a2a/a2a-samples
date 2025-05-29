@@ -4,7 +4,7 @@ This sample demonstrates a currency conversion agent built with [LangGraph](http
 
 ## How It Works
 
-This agent uses LangGraph with Google Gemini to provide currency exchange information through a ReAct agent pattern. The A2A protocol enables standardized interaction with the agent, allowing clients to send requests and receive real-time updates.
+This agent uses LangGraph with LLM (for example Google Gemini..) to provide currency exchange information through a ReAct agent pattern. The A2A protocol enables standardized interaction with the agent, allowing clients to send requests and receive real-time updates.
 
 ```mermaid
 sequenceDiagram
@@ -62,10 +62,14 @@ sequenceDiagram
    cd samples/python/agents/langgraph
    ```
 
-2. Create an environment file with your API key:
+2. Create an environment file with your API key
+   (optional if using command line arguments):
 
    ```bash
-   echo "GOOGLE_API_KEY=your_api_key_here" > .env
+   echo "API_KEY=your_api_key_here" > .env  (not neccessary if have no api key)
+   echo "TOOL_LLM_URL=your_llm_url" > .env
+   echo "TOOL_LLM_NAME=your_llm_name" > .env
+
    ```
 
 3. Run the agent:
@@ -76,6 +80,9 @@ sequenceDiagram
 
    # On custom host/port
    uv run app --host 0.0.0.0 --port 8080
+
+   # With custom LLM configuration
+   uv run . --tool-llm-url your_llm_url --tool-llm-name your_llm_name
    ```
 
 4. In a separate terminal, run the test client:
