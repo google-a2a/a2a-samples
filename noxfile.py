@@ -38,15 +38,6 @@ nox.options.error_on_missing_interpreters = True
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def format(session):
     """Format Python code using autoflake, pyupgrade, and ruff."""
-    # Sort Spelling Allowlist
-    spelling_allow_file = '.github/actions/spelling/allow.txt'
-
-    with open(spelling_allow_file, encoding='utf-8') as file:
-        unique_words = sorted(set(file))
-
-    with open(spelling_allow_file, 'w', encoding='utf-8') as file:
-        file.writelines(unique_words)
-
     format_all = False
 
     if format_all:

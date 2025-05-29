@@ -12,7 +12,7 @@ class HelloWorldAgent:
     """Hello World Agent."""
 
     async def invoke(self) -> str:
-        return "Hello World"
+        return 'Hello World'
 
 
 # --8<-- [end:HelloWorldAgent]
@@ -38,7 +38,9 @@ class HelloWorldAgentExecutor(AgentExecutor):
     # --8<-- [end:HelloWorldAgentExecutor_execute]
 
     # --8<-- [start:HelloWorldAgentExecutor_cancel]
-    async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
-        raise Exception("cancel not supported")
+    async def cancel(
+        self, context: RequestContext, event_queue: EventQueue
+    ) -> None:
+        raise Exception('cancel not supported')
 
     # --8<-- [end:HelloWorldAgentExecutor_cancel]
