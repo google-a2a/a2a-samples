@@ -2,10 +2,9 @@ import asyncio
 import json
 import logging
 import os
-import tempfile
 import time
 import uuid
-from typing import Any, AsyncIterable, Optional
+from typing import Any, AsyncIterable
 
 import google.auth
 from google import genai
@@ -15,6 +14,7 @@ from google.adk.memory.in_memory_memory_service import InMemoryMemoryService # K
 from google.adk.runners import Runner # Kept
 from google.adk.sessions import InMemorySessionService # Kept
 from google.cloud import storage
+from urllib.parse import urlparse
 from google.genai import types as genai_types
 
 
@@ -115,29 +115,6 @@ class VideoGenerationAgent:
             tools=[],
         )
 
-    async def _upload_bytes_to_gcs(self, video_bytes: bytes, bucket_name: str, blob_name: str, content_type: str = 'video/mp4') -> str:
-        if not self.storage_client:
-            raise RuntimeError("Google Cloud Storage client not initialized. Cannot upload video.")
-        
-        bucket = self.storage_client.bucket(bucket_name)
-        blob = bucket.blob(blob_name)
-        
-        temp_dir = tempfile.gettempdir()
-        temp_file_path = os.path.join(temp_dir, blob_name.split('/')[-1])
-
-        try:
-            with open(temp_file_path, 'wb') as f:
-                f.write(video_bytes)
-            logger.info(f"Attempting to upload video from temp file {temp_file_path} to gs://{bucket_name}/{blob_name} with content_type: {content_type}")
-            blob.upload_from_filename(temp_file_path, content_type=content_type)
-        finally:
-            if os.path.exists(temp_file_path):
-                os.remove(temp_file_path)
-        
-        gcs_uri = f"gs://{bucket_name}/{blob_name}"
-        logger.info(f"Successfully uploaded video to {gcs_uri}")
-        return gcs_uri
-
     async def _generate_signed_url(self, blob_name: str, bucket_name: str, expiration_seconds: int) -> str:
 
         bucket = self.storage_client.bucket(bucket_name)
@@ -172,7 +149,7 @@ class VideoGenerationAgent:
         yield {
             'is_task_complete': False,
             'updates': f"Received prompt: '{prompt}'. Starting VEO video generation.",
-            'progress_percent': 0
+            'progress_percent': 0,
         }
 
         start_time = time.monotonic()
@@ -180,6 +157,11 @@ class VideoGenerationAgent:
         veo_operation_name_for_reporting = "N/A"
         try:
             logger.info(f"[{session_id}] Calling VEO with model: {self.VEO_MODEL_NAME}")
+            # Dynamically construct the output GCS URI for VEO
+            veo_output_subpath = f"{session_id}/veo_direct_output/{uuid.uuid4()}"
+            dynamic_output_gcs_uri = f"gs://{self.gcs_bucket_name}/{veo_output_subpath}/" # Use configured bucket
+            logger.info(f"[{session_id}] VEO will output to: {dynamic_output_gcs_uri}")
+
             veo_operation = await asyncio.to_thread(
                 self.genai_client.models.generate_videos,
                 model=self.VEO_MODEL_NAME,
@@ -187,6 +169,7 @@ class VideoGenerationAgent:
                 config=genai_types.GenerateVideosConfig(
                     person_generation=self.VEO_DEFAULT_PERSON_GENERATION,
                     aspect_ratio=self.VEO_DEFAULT_ASPECT_RATIO,
+                    output_gcs_uri=dynamic_output_gcs_uri, # Pass the dynamic URI to VEO
                 ),
             )
             if hasattr(veo_operation, 'name') and veo_operation.name:
@@ -261,53 +244,50 @@ class VideoGenerationAgent:
                 generated_video_info = veo_operation.response.generated_videos[0]
                 video_obj = generated_video_info.video # Assumption: video_obj is always present
 
-                gcs_uri_after_upload = None
                 mime_type = "video/mp4"
 
                 mime_type = video_obj.mime_type or mime_type
-                logger.info(f"[{session_id}] Video object received. Bytes available: {video_obj.video_bytes is not None}, MimeType: {mime_type}")
+                veo_provided_gcs_uri = video_obj.uri
 
-                # Assumption: video_obj.video_bytes is always present and video_obj.uri is not used/None.
-                if not video_obj.video_bytes:
-                    logger.error(f"[{session_id}] Critical assumption violated: VEO response video_obj has no video_bytes.")
+                logger.info(f"[{session_id}] Video object received. VEO GCS URI: {veo_provided_gcs_uri}, MimeType: {mime_type}")
+
+                if not veo_provided_gcs_uri or not veo_provided_gcs_uri.startswith("gs://"):
+                    logger.error(f"[{session_id}] Critical assumption violated: VEO response video_obj has no valid GCS URI. URI: {veo_provided_gcs_uri}")
                     yield {
                         'is_task_complete': True,
-                        'content': "VEO response video_obj has no video_bytes, cannot proceed.",
+                        'content': f"VEO response video_obj has no valid GCS URI ({veo_provided_gcs_uri}), cannot proceed.",
                         'is_error': True,
-                        'final_message_text': "Video processing failed due to missing video byte data.",
+                        'final_message_text': "Video processing failed due to missing GCS URI from VEO.",
                         'progress_percent': 100
                     }
                     return
 
-                # Always upload the bytes to GCS
-                logger.info(f"[{session_id}] Uploading video bytes from VEO to GCS bucket: {self.gcs_bucket_name}.")
-                video_filename_base = f"veo_video_{session_id}_{uuid.uuid4()}"
-                extension = mime_type.split('/')[-1] if '/' in mime_type else 'mp4'
-                video_filename = f"{video_filename_base}.{extension}"
-                gcs_blob_name = f"{session_id}/{video_filename}" # Organize by session_id in bucket
-                gcs_uri_after_upload = await self._upload_bytes_to_gcs(
-                    video_obj.video_bytes,
-                    self.gcs_bucket_name,
-                    gcs_blob_name,
-                    mime_type
-                )
+                # Parse the GCS URI provided by VEO
+                try:
+                    parsed_uri = urlparse(veo_provided_gcs_uri)
+                    veo_bucket_name = parsed_uri.netloc
+                    veo_blob_name = parsed_uri.path.lstrip('/')
+                    logger.info(f"[{session_id}] Parsed VEO GCS URI. Bucket: {veo_bucket_name}, Blob: {veo_blob_name}")
+                except Exception as e:
+                    logger.error(f"[{session_id}] Failed to parse VEO GCS URI '{veo_provided_gcs_uri}': {e}")
+                    yield {'is_task_complete': True, 'content': f"Failed to parse VEO GCS URI: {veo_provided_gcs_uri}", 'is_error': True, 'final_message_text': "Video processing error.", 'progress_percent': 100}
+                    return
 
-                if gcs_uri_after_upload:
+                if veo_bucket_name and veo_blob_name:
                     # Attempt to sign the GCS URI
-                    blob_name_for_signing = gcs_uri_after_upload.replace(f"gs://{self.gcs_bucket_name}/", "")
                     signed_gcs_url = await self._generate_signed_url(
-                        blob_name_for_signing,
-                        self.gcs_bucket_name,
+                        veo_blob_name,
+                        veo_bucket_name, # Use the bucket name from VEO's output URI
                         self.SIGNED_URL_EXPIRATION_SECONDS
                     )
 
-                    video_filename_for_artifact = gcs_uri_after_upload.split("/")[-1] # Name from the uploaded GCS object
-                    artifact_description = f"Generated video for prompt: '{prompt}'. Original GCS location: {gcs_uri_after_upload}"
-                    completion_message = f"Video generation successful. Access video at link (expires): {signed_gcs_url}. Original GCS location: {gcs_uri_after_upload}"
+                    video_filename_for_artifact = veo_provided_gcs_uri.split("/")[-1]
+                    artifact_description = f"Generated video for prompt: '{prompt}'. Original GCS location: {veo_provided_gcs_uri}"
+                    completion_message = f"Video generation successful. Access video at link (expires): {signed_gcs_url}. Original GCS location: {veo_provided_gcs_uri}"
 
-                    if signed_gcs_url == gcs_uri_after_upload : # Signing failed or was not applicable, and it returned the original GCS URI
-                         completion_message = f"Video generation successful. Video stored at GCS: {gcs_uri_after_upload}. A signed URL could not be generated."
-                         logger.warning(f"[{session_id}] Signed URL generation might have failed or was not applicable, using GCS URI: {gcs_uri_after_upload}")
+                    if signed_gcs_url == veo_provided_gcs_uri : # Signing failed or was not applicable, and it returned the original GCS URI
+                         completion_message = f"Video generation successful. Video stored at GCS: {veo_provided_gcs_uri}. A signed URL could not be generated."
+                         logger.warning(f"[{session_id}] Signed URL generation might have failed or was not applicable, using GCS URI: {veo_provided_gcs_uri}")
 
                     logger.info(f"[{session_id}] Yielding final success. Signed GCS URL: {signed_gcs_url}, Artifact Name: {video_filename_for_artifact}")
                     yield {
@@ -322,8 +302,8 @@ class VideoGenerationAgent:
                         'progress_percent': 100
                     }
                 else:
-                    err_message = "VEO generation completed, but failed to obtain a GCS URI after upload for signing."
-                    logger.error(f"[{session_id}] {err_message} (gcs_uri_after_upload was None after attempting upload)")
+                    err_message = "VEO generation completed, but failed to parse bucket/blob from VEO's GCS URI for signing."
+                    logger.error(f"[{session_id}] {err_message} (VEO GCS URI was {veo_provided_gcs_uri})")
                     yield {
                         'is_task_complete': True,
                         'content': err_message,
