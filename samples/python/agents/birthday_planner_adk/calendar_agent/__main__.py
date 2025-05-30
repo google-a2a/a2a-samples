@@ -1,4 +1,6 @@
-import asyncio
+import base64
+import contextlib
+import json
 import logging
 import os
 
@@ -19,7 +21,15 @@ from google.adk.sessions import (
     InMemorySessionService,  # type: ignore[import-untyped]
 )
 from starlette.applications import Starlette
-from starlette.requests import Request
+from starlette.authentication import (
+    AuthCredentials,
+    AuthenticationBackend,
+    BaseUser,
+    SimpleUser,
+)
+from starlette.middleware import Middleware
+from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.requests import HTTPConnection, Request
 from starlette.responses import PlainTextResponse
 from starlette.routing import Route
 
@@ -32,6 +42,26 @@ from a2a.types import AgentCapabilities, AgentCard, AgentSkill
 load_dotenv()
 
 logging.basicConfig()
+
+
+class InsecureJWTAuthBackend(AuthenticationBackend):
+    """An example implementation of a JWT-based authentication backend."""
+
+    async def authenticate(
+        self, conn: HTTPConnection
+    ) -> tuple[AuthCredentials, BaseUser] | None:
+        # For illustrative purposes only: please validate your JWTs!
+        with contextlib.suppress(Exception):
+            auth_header = conn.headers['Authorization']
+            jwt = auth_header.split('Bearer ')[1]
+            jwt_claims = jwt.split('.')[1]
+            missing_padding = len(jwt_claims) % 4
+            if missing_padding:
+                jwt_claims += '=' * (4 - missing_padding)
+            payload = base64.urlsafe_b64decode(jwt_claims).decode('utf-8')
+            parsed_payload = json.loads(payload)
+            return AuthCredentials([]), SimpleUser(parsed_payload['sub'])
+        return None
 
 
 @click.command()
@@ -65,12 +95,13 @@ def main(host: str, port: int):
         defaultOutputModes=['text'],
         capabilities=AgentCapabilities(streaming=True),
         skills=[skill],
+        securitySchemes=[],
     )
 
-    adk_agent = asyncio.run(create_agent(
+    adk_agent = create_agent(
         client_id=os.getenv('GOOGLE_CLIENT_ID'),
         client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
-    ))
+    )
     runner = Runner(
         app_name=agent_card.name,
         agent=adk_agent,
@@ -101,7 +132,14 @@ def main(host: str, port: int):
             endpoint=handle_auth,
         )
     )
-    app = Starlette(routes=routes)
+    app = Starlette(
+        routes=routes,
+        middleware=[
+            Middleware(
+                AuthenticationMiddleware, backend=InsecureJWTAuthBackend()
+            )
+        ],
+    )
 
     uvicorn.run(app, host=host, port=port)
 
