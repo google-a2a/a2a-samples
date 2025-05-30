@@ -55,6 +55,8 @@ class ResponseFormat(BaseModel):
 
 
 class CurrencyAgent:
+    """CurrencyAgent - a specialized assistant for currency convesions."""
+
     SYSTEM_INSTRUCTION = (
         'You are a specialized assistant for currency conversions. '
         "Your sole purpose is to use the 'get_exchange_rate' tool to answer questions about currency exchange rates. "
@@ -78,14 +80,14 @@ class CurrencyAgent:
             response_format=ResponseFormat,
         )
 
-    def invoke(self, query, sessionId) -> str:
-        config = {'configurable': {'thread_id': sessionId}}
+    def invoke(self, query, context_id) -> str:
+        config = {'configurable': {'thread_id': context_id}}
         self.graph.invoke({'messages': [('user', query)]}, config)
         return self.get_agent_response(config)
 
-    async def stream(self, query, sessionId) -> AsyncIterable[dict[str, Any]]:
+    async def stream(self, query, context_id) -> AsyncIterable[dict[str, Any]]:
         inputs = {'messages': [('user', query)]}
-        config = {'configurable': {'thread_id': sessionId}}
+        config = {'configurable': {'thread_id': context_id}}
 
         for item in self.graph.stream(inputs, config, stream_mode='values'):
             message = item['messages'][-1]
