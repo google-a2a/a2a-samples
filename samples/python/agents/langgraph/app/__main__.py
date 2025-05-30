@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 import click
 import httpx
@@ -75,10 +76,10 @@ def main(host, port):
 
     except MissingAPIKeyError as e:
         logger.error(f'Error: {e}')
-        exit(1)
+        sys.exit(1)
     except Exception as e:
         logger.error(f'An error occurred during server startup: {e}')
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

@@ -120,13 +120,13 @@ class CurrencyAgent:
                     'require_user_input': True,
                     'content': structured_response.message,
                 }
-            elif structured_response.status == 'error':
+            if structured_response.status == 'error':
                 return {
                     'is_task_complete': False,
                     'require_user_input': True,
                     'content': structured_response.message,
                 }
-            elif structured_response.status == 'completed':
+            if structured_response.status == 'completed':
                 return {
                     'is_task_complete': True,
                     'require_user_input': False,
