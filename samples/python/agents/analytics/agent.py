@@ -10,7 +10,7 @@ import pandas as pd
 from PIL import Image
 from pydantic import BaseModel
 
-from common.utils.in_memory_cache import InMemoryCache
+from utils import cache
 from crewai import Agent, Crew, Task
 from crewai.process import Process
 from crewai.tools import tool
@@ -35,8 +35,6 @@ def generate_chart_tool(prompt: str, session_id: str) -> str:
 
     if not prompt:
         raise ValueError('Prompt cannot be empty')
-
-    cache = InMemoryCache()
 
     try:
         # Parse CSV-like input
@@ -138,7 +136,7 @@ class ChartGenerationAgent:
         raise NotImplementedError('Streaming is not supported.')
 
     def get_image_data(self, session_id: str, image_key: str) -> Imagedata:
-        cache = InMemoryCache()
+
         session_data = cache.get(session_id)
 
         if not session_data:
