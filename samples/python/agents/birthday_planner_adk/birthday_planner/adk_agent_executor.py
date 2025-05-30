@@ -207,7 +207,7 @@ class ADKAgentExecutor(AgentExecutor):
             while not self._is_task_complete(dependent_task):
                 await asyncio.sleep(AUTH_TASK_POLLING_DELAY_SECONDS)
                 response = await a2a_client.get_task(
-                    GetTaskRequest(params=TaskQueryParams(id=dependent_task.id))
+                    GetTaskRequest(id=str(uuid4()), params=TaskQueryParams(id=dependent_task.id))
                 )
                 if not isinstance(response.root, GetTaskSuccessResponse):
                     logger.debug('Getting dependent task failed: %s', response)
@@ -260,6 +260,7 @@ class ADKAgentExecutor(AgentExecutor):
         # - If the last response from the calendar agent (in this session) produced a non-terminal
         #   task state, the request references that task.
         request = SendMessageRequest(
+            id=str(uuid4()),
             params=MessageSendParams(
                 message=Message(
                     contextId=tool_context._invocation_context.session.id,

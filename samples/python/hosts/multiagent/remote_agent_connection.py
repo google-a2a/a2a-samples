@@ -12,7 +12,7 @@ from a2a.types import (
     SendStreamingMessageRequest,
     JSONRPCErrorResponse,
 )
-
+from uuid import uuid4
 
 TaskCallbackArg = Task | TaskStatusUpdateEvent | TaskArtifactUpdateEvent
 TaskUpdateCallback = Callable[[TaskCallbackArg, AgentCard], Task]
@@ -37,7 +37,7 @@ class RemoteAgentConnections:
         if self.card.capabilities.streaming:
             task = None
             async for response in self.agent_client.send_message_streaming(
-                SendStreamingMessageRequest(params=request)
+                SendStreamingMessageRequest(id=str(uuid4()), params=request)
             ):
                 if not response.root.result:
                     return response.root.error
@@ -54,7 +54,7 @@ class RemoteAgentConnections:
             return task
         else:  # Non-streaming
             response = await self.agent_client.send_message(
-                SendMessageRequest(params=request)
+                SendMessageRequest(id=str(uuid4()), params=request)
             )
             if isinstance(response.root, JSONRPCErrorResponse):
                 return response.root.error

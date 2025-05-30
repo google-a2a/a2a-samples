@@ -37,6 +37,7 @@ Before each response, reason through:
 You will use the tools provided to you to search for the ariline tickets, after you have all the information.
 For return bookings, you will use the tools again.
 
+
 If the search does not return any results for the user criteria.
     - Search again for a different ticket class.
     - Respond to the user in the following format.
@@ -44,7 +45,6 @@ If the search does not return any results for the user criteria.
         "status": "input_required",
         "question": "I could not find any flights that match your criteria, but I found tickets in First Class, would you like to book that instead?"
     }
-
 
 Schema for the datamodel is in the DATAMODEL section.
 Respond in the format shown in the RESPONSE section.
