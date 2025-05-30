@@ -24,7 +24,6 @@ packages = ["common", "hosts"]
 members = [
     "agents/crewai",
     "agents/google_adk",
-    "agents/langgraph",
     "agents/marvin",
     "hosts/cli",
     "hosts/extended_agent_card_cli",
