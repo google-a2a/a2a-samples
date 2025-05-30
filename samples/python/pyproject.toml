@@ -25,7 +25,6 @@ members = [
     "agents/crewai",
     "agents/analytics",
     "agents/google_adk",
-    "agents/langgraph",
     "agents/marvin",
     "hosts/cli",
     "hosts/extended_agent_card_cli",

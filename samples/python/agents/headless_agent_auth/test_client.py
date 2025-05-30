@@ -99,7 +99,7 @@ async def cli(agent: str, context_id: str | None, history: bool, debug: bool):
             if history and continue_loop:
                 print('========= History ======== ')
                 get_task_response = await client.get_task(
-                    GetTaskRequest(params=TaskQueryParams(**{'id': task_id, 'historyLength': 10}))
+                    GetTaskRequest(id=str(uuid4()), params=TaskQueryParams(**{'id': task_id, 'historyLength': 10}))
                 )
                 print(
                     get_task_response.root.model_dump_json(
@@ -154,7 +154,7 @@ async def complete_task(
 
     task = None
     if streaming:
-        stream_response = client.send_message_streaming(SendStreamingMessageRequest(params=send_params))
+        stream_response = client.send_message_streaming(SendStreamingMessageRequest(id=str(uuid4()), params=send_params))
         async for chunk in stream_response:
             result = chunk.root.result
             print(
@@ -197,10 +197,10 @@ async def complete_task(
                 )
             )
         
-        get_task_response = await client.get_task(GetTaskRequest(params=TaskQueryParams(**{'id': task_id})))
+        get_task_response = await client.get_task(GetTaskRequest(id=str(uuid4()), params=TaskQueryParams(id=task_id)))
         task = get_task_response.root.result
     else:
-        send_message_response = await client.send_message(SendMessageRequest(params=send_params))
+        send_message_response = await client.send_message(SendMessageRequest(id=str(uuid4()), params=send_params))
         task = send_message_response.root.result
         print(f'\n{task.model_dump_json(exclude_none=True)}')
 
