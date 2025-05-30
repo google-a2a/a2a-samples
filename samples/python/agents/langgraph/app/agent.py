@@ -25,10 +25,12 @@ def get_exchange_rate(
     Args:
         currency_from: The currency to convert from (e.g., "USD").
         currency_to: The currency to convert to (e.g., "EUR").
-        currency_date: The date for the exchange rate or "latest". Defaults to "latest".
+        currency_date: The date for the exchange rate or "latest". Defaults to
+            "latest".
 
     Returns:
-        A dictionary containing the exchange rate data, or an error message if the request fails.
+        A dictionary containing the exchange rate data, or an error message if
+        the request fails.
     """
     try:
         response = httpx.get(
@@ -138,7 +140,10 @@ class CurrencyAgent:
         return {
             'is_task_complete': False,
             'require_user_input': True,
-            'content': 'We are unable to process your request at the moment. Please try again.',
+            'content': (
+                'We are unable to process your request at the moment. '
+                'Please try again.'
+            ),
         }
 
     SUPPORTED_CONTENT_TYPES = ['text', 'text/plain']
