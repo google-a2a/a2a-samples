@@ -43,14 +43,17 @@ class ChartGenerationAgentExecutor(AgentExecutor):
         )
         if data and not data.error:
             parts = [
-                FilePart(
-                    file=FileWithBytes(
-                        bytes=data.bytes,
-                        mimeType=data.mime_type,
-                        name=data.name,
+                Part(
+                    root=FilePart(
+                        file=FileWithBytes(
+                            bytes=data.bytes,
+                            mimeType=data.mime_type,
+                            name=data.name,
+                        )
                     )
                 )
             ]
+
         else:
             parts = [
                 Part(

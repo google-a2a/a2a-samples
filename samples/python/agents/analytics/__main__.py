@@ -28,41 +28,26 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class MissingAPIKeyError(Exception):
-    """Exception for missing API key."""
-
-    pass
-
 
 @click.command()
 @click.option('--host', 'host', default='localhost')
 @click.option('--port', 'port', default=10011)
 def main(host, port):
-    """Entry point for the A2A + CrewAI Image generation sample."""
-    try:
-        if not os.getenv('GOOGLE_API_KEY') and not os.getenv(
-            'GOOGLE_GENAI_USE_VERTEXAI'
-        ):
-            raise MissingAPIKeyError(
-                'GOOGLE_API_KEY or Vertex AI environment variables not set.'
-            )
+    """Entry point for the A2A Chart Generation Agent."""
 
+    try:
         capabilities = AgentCapabilities(streaming=False)
         skill = AgentSkill(
             id='image_generator',
             name='Image Generator',
-            description=(
-                'Generate a chart based on CSV-like data passed in'
-            ),
+            description='Generate a chart based on CSV-like data passed in',
             tags=['generate image', 'edit image'],
             examples=['Generate a photorealistic image of raspberry lemonade'],
         )
 
         agent_card = AgentCard(
             name='Chart Generator Agent',
-            description=(
-                'Generate charts from structured CSV-like data input.'
-            ),
+            description='Generate charts from structured CSV-like data input.',
             url=f'http://{host}:{port}/',
             version='1.0.0',
             defaultInputModes=ChartGenerationAgent.SUPPORTED_CONTENT_TYPES,
@@ -75,16 +60,14 @@ def main(host, port):
             agent_executor=ChartGenerationAgentExecutor(),
             task_store=InMemoryTaskStore(),
         )
+
         server = A2AStarletteApplication(
             agent_card=agent_card, http_handler=request_handler
         )
-        import uvicorn
 
+        import uvicorn
         uvicorn.run(server.build(), host=host, port=port)
 
-    except MissingAPIKeyError as e:
-        logger.error(f'Error: {e}')
-        exit(1)
     except Exception as e:
         logger.error(f'An error occurred during server startup: {e}')
         exit(1)

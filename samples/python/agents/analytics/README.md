@@ -61,8 +61,7 @@ sequenceDiagram
 2. Create an environment file with your API key (or Vertex AI credentials):
 
    ```bash
-   echo "GOOGLE_API_KEY=your_api_key_here" > .env
-   echo "OPENAI_API_KEY=your_openapi_key here" > .env
+   echo "OPENAI_API_KEY=your_openapi_key_here" > .env
    ```
 
 3. Set up the Python environment:
