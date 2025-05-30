@@ -1,15 +1,14 @@
 from collections.abc import AsyncIterable
-from typing import Any, Literal, Dict
+from typing import Any, Literal
 
 import httpx
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
-from pydantic import BaseModel
-
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
+from pydantic import BaseModel
 
 
 memory = MemorySaver()
@@ -84,7 +83,7 @@ class CurrencyAgent:
         self.graph.invoke({'messages': [('user', query)]}, config)
         return self.get_agent_response(config)
 
-    async def stream(self, query, sessionId) -> AsyncIterable[Dict[str, Any]]:
+    async def stream(self, query, sessionId) -> AsyncIterable[dict[str, Any]]:
         inputs = {'messages': [('user', query)]}
         config = {'configurable': {'thread_id': sessionId}}
 
