@@ -50,7 +50,7 @@ sequenceDiagram
 
 ## Prerequisites
 
-- Python 3.13 or higher
+- Python 3.12 or higher
 - [UV](https://docs.astral.sh/uv/)
 - Access to an LLM and API Key
 
@@ -72,17 +72,16 @@ sequenceDiagram
 
    ```bash
    # Basic run on default port 10000
-   uv run .
+   uv run app
 
    # On custom host/port
-   uv run . --host 0.0.0.0 --port 8080
+   uv run app --host 0.0.0.0 --port 8080
    ```
 
-4. In a separate terminal, run an A2A [client](/samples/python/hosts/README.md):
+4. In a separate terminal, run the test client:
 
    ```bash
-   cd samples/python/hosts/cli
-   uv run .
+   uv run app/test_client.py
    ```
 
 ## Technical Implementation
@@ -316,7 +315,7 @@ data: {"jsonrpc":"2.0","id":12,"result":{"id":"131","status":{"state":"completed
 
 ## Learn More
 
-- [A2A Protocol Documentation](https://google.github.io/A2A/#/documentation)
+- [A2A Protocol Documentation](https://google-a2a.github.io/A2A/)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
 - [Frankfurter API](https://www.frankfurter.app/docs/)
 - [Google Gemini API](https://ai.google.dev/gemini-api)
