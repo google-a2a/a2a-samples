@@ -17,7 +17,7 @@ from a2a.utils import (
     new_task,
 )
 from a2a.utils.errors import ServerError
-from agent import CurrencyAgent
+from .agent import CurrencyAgent
 
 
 logging.basicConfig(level=logging.INFO)
