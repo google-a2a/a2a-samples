@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 import click
 import httpx
@@ -13,10 +14,10 @@ from a2a.types import (
     AgentCard,
     AgentSkill,
 )
-from agent import CurrencyAgent
-from agent_executor import CurrencyAgentExecutor
-from agents.langgraph.agent import CurrencyAgent
 from dotenv import load_dotenv
+
+from app.agent import CurrencyAgent
+from app.agent_executor import CurrencyAgentExecutor
 
 
 load_dotenv()
@@ -75,10 +76,10 @@ def main(host, port):
 
     except MissingAPIKeyError as e:
         logger.error(f'Error: {e}')
-        exit(1)
+        sys.exit(1)
     except Exception as e:
         logger.error(f'An error occurred during server startup: {e}')
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
