@@ -116,8 +116,8 @@ Agent can also be built using a container file.
     podman build -f demo/ui/Containerfile . -t a2a-ui
     ```
 
-    > [!Tip]  
-    > Podman is a drop-in replacement for `docker` which can also be used in these commands.
+> [!Tip]  
+> Podman is a drop-in replacement for `docker` which can also be used in these commands.
 
 3. Run you container
 
@@ -125,5 +125,5 @@ Agent can also be built using a container file.
     podman run -p 12000:12000 --network host a2a-ui
     ```
 
-    > [!Important]  
-    > Using the `host` network not recommended in production.
+> [!Important]  
+> Using the `host` network not recommended in production.
