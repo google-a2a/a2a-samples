@@ -1,3 +1,4 @@
+import os
 import logging
 import asyncio
 from collections.abc import AsyncIterable
@@ -9,6 +10,7 @@ from langchain_core.runnables.config import (
 )
 
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_google_vertexai import ChatVertexAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 from pydantic import BaseModel
@@ -50,9 +52,19 @@ class AirbnbAgent:
         """
         logger.info("Initializing AirbnbAgent with preloaded MCP tools...")
         try:
-            # Using the model name from your provided file
-            self.model = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17")
-            logger.info("ChatGoogleGenerativeAI model initialized successfully.")
+
+            model = os.getenv("GOOGLE_GENAI_MODEL", "gemini-2.5-flash-preview-05-20")
+
+            if os.getenv("GOOGLE_GENAI_USE_VERTEXAI") == "TRUE":
+                # If not using Vertex AI, initialize with Google Generative AI
+                logger.info("ChatVertexAI model initialized successfully.")
+                self.model = ChatVertexAI(model=model)
+
+            else:
+                # Using the model name from your provided file
+                self.model = ChatGoogleGenerativeAI(model=model)
+                logger.info("ChatGoogleGenerativeAI model initialized successfully.")
+
         except Exception as e:
             logger.error(
                 f"Failed to initialize ChatGoogleGenerativeAI model: {e}", exc_info=True

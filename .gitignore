@@ -154,6 +154,7 @@ tmp*
 
 # Node
 **/node_modules
+.npm
 npm-debug.log
 yarn-error.log
 
