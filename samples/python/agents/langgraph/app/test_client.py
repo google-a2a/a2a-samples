@@ -14,17 +14,18 @@ from a2a.types import (
 )
 
 
-async def main() -> None:
-    PUBLIC_AGENT_CARD_PATH = '/.well-known/agent.json'
-    EXTENDED_AGENT_CARD_PATH = '/agent/authenticatedExtendedCard'
+PUBLIC_AGENT_CARD_PATH = '/.well-known/agent.json'
+EXTENDED_AGENT_CARD_PATH = '/agent/authenticatedExtendedCard'
 
+
+async def main() -> None:
     # Configure logging to show INFO level messages
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)  # Get a logger instance
 
     # --8<-- [start:A2ACardResolver]
 
-    base_url = 'http://localhost:9999'
+    base_url = 'http://localhost:10000'
 
     async with httpx.AsyncClient() as httpx_client:
         # Initialize A2ACardResolver
@@ -57,7 +58,9 @@ async def main() -> None:
             if _public_card.supportsAuthenticatedExtendedCard:
                 try:
                     logger.info(
-                        f'\nPublic card supports authenticated extended card. Attempting to fetch from: {base_url}{EXTENDED_AGENT_CARD_PATH}'
+                        '\nPublic card supports authenticated extended card. '
+                        'Attempting to fetch from: '
+                        f'{base_url}{EXTENDED_AGENT_CARD_PATH}'
                     )
                     auth_headers_dict = {
                         'Authorization': 'Bearer dummy-token-for-extended-card'
@@ -78,11 +81,13 @@ async def main() -> None:
                         _extended_card  # Update to use the extended card
                     )
                     logger.info(
-                        '\nUsing AUTHENTICATED EXTENDED agent card for client initialization.'
+                        '\nUsing AUTHENTICATED EXTENDED agent card for client '
+                        'initialization.'
                     )
                 except Exception as e_extended:
                     logger.warning(
-                        f'Failed to fetch extended agent card: {e_extended}. Will proceed with public card.',
+                        f'Failed to fetch extended agent card: {e_extended}. '
+                        'Will proceed with public card.',
                         exc_info=True,
                     )
             elif (
