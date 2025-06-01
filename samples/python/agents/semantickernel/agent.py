@@ -110,7 +110,11 @@ def _get_openai_chat_completion_service() -> OpenAIChatCompletion:
             f"Missing required OpenAI environment variables: {', '.join(missing_vars)}"
         )
     
-    return OpenAIChatCompletion(service_id=service_id)
+    return OpenAIChatCompletion(
+        service_id=service_id,
+        ai_model_id=os.getenv('OPENAI_MODEL_ID'),
+        api_key=os.getenv('OPENAI_API_KEY'),
+      )
 
 
 def auto_detect_chat_service() -> "ChatCompletionClientBase":
