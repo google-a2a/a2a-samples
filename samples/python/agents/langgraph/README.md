@@ -100,8 +100,8 @@ Agent can also be built using a container file.
     podman build -f agents/langgraph/Containerfile . -t langgraph-a2a-server
     ```
 
-> [!Tip]  
-> Podman is a drop-in replacement for `docker` which can also be used in these commands.
+    > [!Tip]  
+    > Podman is a drop-in replacement for `docker` which can also be used in these commands.
 
 3. Run you container
 
@@ -111,9 +111,9 @@ Agent can also be built using a container file.
 
 4. Run A2A client (follow step 5 from the section above)
 
-> [!Important]
-> * **Access URL:** You must access the A2A client through the URL `0.0.0.0:10000`. Using `localhost` will not work.
-> * **Hostname Override:** If you're deploying to an environment where the hostname is defined differently outside the container, use the `HOST_OVERRIDE` environment variable to set the expected hostname on the Agent Card. This ensures proper communication with your client application.
+    > [!Important]
+    > * **Access URL:** You must access the A2A client through the URL `0.0.0.0:10000`. Using `localhost` will not work.
+    > * **Hostname Override:** If you're deploying to an environment where the hostname is defined differently outside the container, use the `HOST_OVERRIDE` environment variable to set the expected hostname on the Agent Card. This ensures proper communication with your client application.
 
 ## Technical Implementation
 
