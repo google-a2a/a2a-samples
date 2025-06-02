@@ -42,12 +42,7 @@ def main(host: str, port: int):
                 )
             logger.info(f"Using Vertex AI with project: {os.getenv('GOOGLE_CLOUD_PROJECT')} and location: {os.getenv('GOOGLE_CLOUD_LOCATION')}")
         else:  # Not using Vertex AI, so API key is expected
-            if not os.getenv('GOOGLE_API_KEY'):
-                raise Exception(
-                    'GOOGLE_API_KEY environment variable not set and GOOGLE_GENAI_USE_VERTEXAI is not TRUE. '
-                    'VEO generation requires authentication.'
-                )
-            logger.info("Using Google AI Studio (API Key) for VEO generation.")
+            logger.error("Vertex AI is required for this agent. Please set GOOGLE_GENAI_USE_VERTEXAI to TRUE and configure GOOGLE_CLOUD_PROJECT and GOOGLE_CLOUD_LOCATION.")
 
         # Check for GCS bucket name (critical for video output)
         if not os.getenv(VideoGenerationAgent.GCS_BUCKET_NAME_ENV_VAR):
