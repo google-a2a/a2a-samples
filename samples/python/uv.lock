@@ -20,7 +20,7 @@ members = [
     "a2a-samples-marvin",
     "a2a-samples-mcp",
     "a2a-semantic-kernel",
-    "veo-google-adk-sample-agent",
+    "veo-video-sample-agent",
 ]
 
 [[package]]
@@ -137,7 +137,7 @@ dependencies = [
     { name = "starlette" },
     { name = "typing-extensions" },
     { name = "uvicorn" },
-    { name = "veo-google-adk-sample-agent" },
+    { name = "veo-video-sample-agent" },
 ]
 
 [package.dev-dependencies]
@@ -159,7 +159,7 @@ requires-dist = [
     { name = "starlette", specifier = ">=0.46.1" },
     { name = "typing-extensions", specifier = ">=4.12.2" },
     { name = "uvicorn", specifier = ">=0.34.0" },
-    { name = "veo-google-adk-sample-agent", editable = "agents/veo_video_gen_google_adk" },
+    { name = "veo-video-sample-agent", editable = "agents/veo_video_gen" },
 ]
 
 [package.metadata.requires-dev]
@@ -5136,9 +5136,9 @@ wheels = [
 ]
 
 [[package]]
-name = "veo-google-adk-sample-agent"
+name = "veo-video-sample-agent"
 version = "0.1.0"
-source = { editable = "agents/veo_video_gen_google_adk" }
+source = { editable = "agents/veo_video_gen" }
 dependencies = [
     { name = "a2a-samples" },
     { name = "click" },

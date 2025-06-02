@@ -15,7 +15,7 @@ dependencies = [
     "starlette>=0.46.1",
     "typing-extensions>=4.12.2",
     "uvicorn>=0.34.0",
-    "veo-google-adk-sample-agent",
+    "veo-video-sample-agent",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -35,11 +35,11 @@ members = [
     "agents/mindsdb",
     "agents/ag2",
     "agents/extended_agent_card_adk",
-    "agents/veo_video_gen_google_adk",
+    "agents/veo_video_gen",
 ]
 
 [tool.uv.sources]
-veo-google-adk-sample-agent = { workspace = true }
+veo-video-sample-agent = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]

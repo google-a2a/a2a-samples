@@ -1,7 +1,7 @@
 [project]
-name = "veo-google-adk-sample-agent"
+name = "veo-video-sample-agent"
 version = "0.1.0"
-description = "Sample Google ADK that uses VEO for video generation." 
+description = "Sample agent that uses VEO for video generation." 
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
