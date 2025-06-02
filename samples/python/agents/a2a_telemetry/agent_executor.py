@@ -92,3 +92,9 @@ class QnAAgentExecutor(AgentExecutor):
                     TaskState.working,
                     message=updater.new_text_message('Working...'),
                 )
+        else:
+            logger.debug('Agent failed to complete')
+            updater.update_status(
+                TaskState.failed,
+                message=updater.new_text_message('Failed to generate a response.'),
+            )
