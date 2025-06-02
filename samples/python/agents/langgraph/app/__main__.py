@@ -1,21 +1,23 @@
 import logging
 import os
+import sys
 
 import click
 import httpx
+import uvicorn
 
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.server.tasks import InMemoryTaskStore, InMemoryPushNotifier
+from a2a.server.tasks import InMemoryPushNotifier, InMemoryTaskStore
 from a2a.types import (
     AgentCapabilities,
     AgentCard,
     AgentSkill,
 )
-from agent import CurrencyAgent
-from agent_executor import CurrencyAgentExecutor
-from agents.langgraph.agent import CurrencyAgent
 from dotenv import load_dotenv
+
+from app.agent import CurrencyAgent
+from app.agent_executor import CurrencyAgentExecutor
 
 
 load_dotenv()
@@ -26,8 +28,6 @@ logger = logging.getLogger(__name__)
 
 class MissingAPIKeyError(Exception):
     """Exception for missing API key."""
-
-    pass
 
 
 @click.command()
@@ -60,6 +60,7 @@ def main(host, port):
             skills=[skill],
         )
 
+        # --8<-- [start:DefaultRequestHandler]
         httpx_client = httpx.AsyncClient()
         request_handler = DefaultRequestHandler(
             agent_executor=CurrencyAgentExecutor(),
@@ -69,15 +70,16 @@ def main(host, port):
         server = A2AStarletteApplication(
             agent_card=agent_card, http_handler=request_handler
         )
-        import uvicorn
 
         uvicorn.run(server.build(), host=host, port=port)
+        # --8<-- [end:DefaultRequestHandler]
+
     except MissingAPIKeyError as e:
         logger.error(f'Error: {e}')
-        exit(1)
+        sys.exit(1)
     except Exception as e:
         logger.error(f'An error occurred during server startup: {e}')
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

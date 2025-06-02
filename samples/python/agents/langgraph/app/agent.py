@@ -1,15 +1,14 @@
 from collections.abc import AsyncIterable
-from typing import Any, Literal, Dict
+from typing import Any, Literal
 
 import httpx
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
-from pydantic import BaseModel
-
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
+from pydantic import BaseModel
 
 
 memory = MemorySaver()
@@ -26,10 +25,12 @@ def get_exchange_rate(
     Args:
         currency_from: The currency to convert from (e.g., "USD").
         currency_to: The currency to convert to (e.g., "EUR").
-        currency_date: The date for the exchange rate or "latest". Defaults to "latest".
+        currency_date: The date for the exchange rate or "latest". Defaults to
+            "latest".
 
     Returns:
-        A dictionary containing the exchange rate data, or an error message if the request fails.
+        A dictionary containing the exchange rate data, or an error message if
+        the request fails.
     """
     try:
         response = httpx.get(
@@ -56,6 +57,8 @@ class ResponseFormat(BaseModel):
 
 
 class CurrencyAgent:
+    """CurrencyAgent - a specialized assistant for currency convesions."""
+
     SYSTEM_INSTRUCTION = (
         'You are a specialized assistant for currency conversions. '
         "Your sole purpose is to use the 'get_exchange_rate' tool to answer questions about currency exchange rates. "
@@ -79,14 +82,14 @@ class CurrencyAgent:
             response_format=ResponseFormat,
         )
 
-    def invoke(self, query, sessionId) -> str:
-        config = {'configurable': {'thread_id': sessionId}}
+    def invoke(self, query, context_id) -> str:
+        config = {'configurable': {'thread_id': context_id}}
         self.graph.invoke({'messages': [('user', query)]}, config)
         return self.get_agent_response(config)
 
-    async def stream(self, query, sessionId) -> AsyncIterable[Dict[str, Any]]:
+    async def stream(self, query, context_id) -> AsyncIterable[dict[str, Any]]:
         inputs = {'messages': [('user', query)]}
-        config = {'configurable': {'thread_id': sessionId}}
+        config = {'configurable': {'thread_id': context_id}}
 
         for item in self.graph.stream(inputs, config, stream_mode='values'):
             message = item['messages'][-1]
@@ -121,13 +124,13 @@ class CurrencyAgent:
                     'require_user_input': True,
                     'content': structured_response.message,
                 }
-            elif structured_response.status == 'error':
+            if structured_response.status == 'error':
                 return {
                     'is_task_complete': False,
                     'require_user_input': True,
                     'content': structured_response.message,
                 }
-            elif structured_response.status == 'completed':
+            if structured_response.status == 'completed':
                 return {
                     'is_task_complete': True,
                     'require_user_input': False,
@@ -137,7 +140,10 @@ class CurrencyAgent:
         return {
             'is_task_complete': False,
             'require_user_input': True,
-            'content': 'We are unable to process your request at the moment. Please try again.',
+            'content': (
+                'We are unable to process your request at the moment. '
+                'Please try again.'
+            ),
         }
 
     SUPPORTED_CONTENT_TYPES = ['text', 'text/plain']

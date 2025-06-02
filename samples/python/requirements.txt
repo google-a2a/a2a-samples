@@ -1,0 +1,2 @@
+a2a-sdk>=latest
+uvicorn>=latest
