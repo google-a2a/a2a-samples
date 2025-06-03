@@ -3,6 +3,7 @@ import base64
 import os
 import threading
 import uuid
+from typing import cast
 
 import httpx
 
@@ -94,9 +95,15 @@ class ConversationServer:
         message_data = await request.json()
         message = Message(**message_data['params'])
         message = self.manager.sanitize_message(message)
-        t = threading.Thread(
-            target=lambda: asyncio.run(self.manager.process_message(message))
-        )
+        loop = asyncio.get_event_loop()
+        if isinstance(self.manager, ADKHostManager):
+            t = threading.Thread(
+                target=lambda: cast(ADKHostManager, self.manager).process_message_threadsafe(message, loop)
+            )
+        else:
+            t = threading.Thread(
+                target=lambda: asyncio.run(self.manager.process_message(message))
+            )
         t.start()
         return SendMessageResponse(
             result=MessageInfo(
