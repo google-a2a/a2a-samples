@@ -20,16 +20,16 @@ Hello World example agent that only returns Message events
 
 Agent can also be built using a container file.
 
-1. Navigate to the `samples/python` directory:
+1. Navigate to the directory `samples/python/agents/helloworld` directory:
 
   ```bash
-  cd samples/python
+  cd samples/python/agents/helloworld
   ```
 
 2. Build the container file
 
     ```bash
-    podman build -f agents/helloworld/Containerfile . -t helloworld-a2a-server
+    podman build . -t helloworld-a2a-server
     ```
 
 > [!Tip]  

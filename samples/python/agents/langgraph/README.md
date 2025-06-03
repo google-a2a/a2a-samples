@@ -88,16 +88,16 @@ sequenceDiagram
 
 Agent can also be built using a container file.
 
-1. Navigate to the `samples/python` directory:
+1. Navigate to the `samples/python/agents/langgraph` directory:
 
   ```bash
-  cd samples/python
+  cd samples/python/agents/langgraph
   ```
 
 2. Build the container file
 
     ```bash
-    podman build -f agents/langgraph/Containerfile . -t langgraph-a2a-server
+    podman build . -t langgraph-a2a-server
     ```
 
 > [!Tip]  

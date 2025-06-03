@@ -1,10 +1,10 @@
 FROM registry.access.redhat.com/ubi8/python-312
 
 # Set work directory
-WORKDIR /opt/app-root/agents/langgraph
+WORKDIR /opt/app-root
 
 # Copy Python Project Files (Container context must be the `python` directory)
-COPY ../.. /opt/app-root
+COPY . /opt/app-root
 
 USER root
 
