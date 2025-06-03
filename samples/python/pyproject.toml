@@ -15,6 +15,7 @@ dependencies = [
     "starlette>=0.46.1",
     "typing-extensions>=4.12.2",
     "uvicorn>=0.34.0",
+    "veo-video-sample-agent",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -32,8 +33,12 @@ members = [
     "agents/semantickernel",
     "agents/mindsdb",
     "agents/ag2",
-    "agents/extended_agent_card_adk"
+    "agents/extended_agent_card_adk",
+    "agents/veo_video_gen",
 ]
+
+[tool.uv.sources]
+veo-video-sample-agent = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
