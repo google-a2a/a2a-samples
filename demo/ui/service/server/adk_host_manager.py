@@ -7,6 +7,7 @@ import uuid
 from typing import Optional, Tuple
 
 import httpx
+import asyncio
 
 from a2a.types import (
     AgentCard,
@@ -618,6 +619,11 @@ class ADKHostManager(ApplicationManager):
                 Part(root=DataPart(data=part.function_response.model_dump()))
             )
         return parts
+
+    def process_message_threadsafe(self, message: Message, loop: asyncio.AbstractEventLoop):
+        """Safely run process_message from a thread using the given event loop."""
+        future = asyncio.run_coroutine_threadsafe(self.process_message(message), loop)
+        return future  # You can call future.result() to get the result if needed
 
 
 def get_message_id(m: Message | None) -> str | None:
