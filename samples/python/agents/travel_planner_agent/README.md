@@ -1,7 +1,7 @@
 # travel planner example
-> This is a Python implementation that adheres to the A2A (Assume to Answer) protocol. 
+> This is a Python implementation that adheres to the A2A (Agent2Agent) protocol. 
 > It is a travel assistant in line with the specifications of the OpenAI model, capable of providing you with travel planning services.
-> A travel assistant demo implemented based on Google's official a2a-python ADK.
+> A travel assistant demo implemented based on Google's official a2a-python SDK.
 
 ## Getting started
 
