@@ -26,10 +26,7 @@ class TravelPlannerAgentExecutor(AgentExecutor):
         if not context.message:
             raise Exception('No message provided')
 
-        print(f'query:{query}')
-        print('answer:')
         async for event in self.agent.stream(query):
-            print(event['content'])
             message = TaskArtifactUpdateEvent(
                 contextId=context.context_id,
                 taskId=context.task_id,
