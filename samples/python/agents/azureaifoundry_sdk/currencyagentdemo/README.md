@@ -115,6 +115,13 @@ The currency agent is an intelligent assistant specifically designed for currenc
 uv run .
 ```
 
+or
+
+```
+# On custom host/port
+uv run . --host 0.0.0.0 --port 8080
+```
+
 - Testing in Thunder Client VS Code Extension 
 
   - INPUT Endpoint http://localhost:47128
