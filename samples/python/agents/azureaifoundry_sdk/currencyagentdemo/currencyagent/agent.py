@@ -31,13 +31,24 @@ class CurrencyAgent:
 
 
     def __init__(self):
+        # Check if required environment variable exists
+        if "AZURE_AI_FOUNDRY_PROJECT_ENDPOINT" not in os.environ:
+            raise ValueError("AZURE_AI_FOUNDRY_PROJECT_ENDPOINT environment variable is not set. "
+                           "Please configure your Azure AI Foundry endpoint.")
+                           
         self.endpoint = os.environ["AZURE_AI_FOUNDRY_PROJECT_ENDPOINT"]
+        
+        # Check if endpoint value is valid
+        if not self.endpoint or not self.endpoint.strip():
+            raise ValueError("AZURE_AI_FOUNDRY_PROJECT_ENDPOINT environment variable is empty. "
+                           "Please provide a valid Azure AI Foundry endpoint.")
+                           
         self.credential = DefaultAzureCredential()
-        self.agent: Optional[Agent] = None
+        self.agent: Agent | None = None
         self.threads: Dict[str, str] = {}  # thread_id -> thread_id mapping
         self.mcp_server_url = os.environ.get("MCP_ENDPOINT")
-        self.mcp_tool_manager : Optional[MCPToolManager] = None  # Placeholder for MCPToolManager or similar
-    
+        self.mcp_tool_manager : MCPToolManager | None = None  # Placeholder for MCPToolManager or similar
+
 
     def _get_client(self) -> AgentsClient:
         """Get a new AgentsClient instance for use in context managers."""
@@ -137,10 +148,8 @@ class CurrencyAgent:
                 iterations += 1
                 time.sleep(1)
                 run = client.runs.get(thread_id=thread_id, run_id=run.id)
-                # logger.debug(f"Run status: {run.status} (iteration {iterations})")
                 
                 if run.status == "failed":
-                    # logger.error(f"Run failed during polling: {run.last_error}")
                     break
                 
                 # Handle tool calls if needed
@@ -324,11 +333,22 @@ class CurrencyAgent:
                 logger.info(f"Processing mcp tool call: {function_name} with args: {arguments_str}")
                 
                 try:
-                    # Parse arguments from JSON string
-                    arguments = json.loads(arguments_str)
-                    logger.info(f"Parsed arguments: {arguments}")
-                    logger.info(f"Arguments type: {type(arguments)}")
-                    logger.info(f"Arguments keys: {list(arguments.keys()) if isinstance(arguments, dict) else 'Not a dict'}")
+                    # Parse arguments from JSON string with defensive handling
+                    if not arguments_str or arguments_str.strip() == "":
+                        logger.warning(f"Empty or null arguments for tool {function_name}, using empty dict")
+                        arguments = {}
+                    else:
+                        try:
+                            arguments = json.loads(arguments_str)
+                            logger.info(f"Parsed arguments: {arguments}")
+                            logger.info(f"Arguments type: {type(arguments)}")
+                            logger.info(f"Arguments keys: {list(arguments.keys()) if isinstance(arguments, dict) else 'Not a dict'}")
+                        except json.JSONDecodeError as json_error:
+                            logger.error(f"Failed to parse JSON arguments for tool {function_name}: {json_error}")
+                            logger.error(f"Raw arguments string: '{arguments_str}'")
+                            # Try to recover by using empty arguments or skip this tool call
+                            arguments = {}
+                            logger.warning(f"Using empty arguments for tool {function_name} due to JSON parse error")
                     
                     # Check if the function exists in MCP tools
                     available_tools = self.mcp_tool_manager.get_tools()

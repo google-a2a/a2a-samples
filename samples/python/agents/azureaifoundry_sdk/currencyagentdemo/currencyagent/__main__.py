@@ -19,7 +19,7 @@ load_dotenv()
 
 @click.command()
 @click.option('--host', default='localhost')
-@click.option('--port', default=10020)
+@click.option('--port', default=47128)  # Updated to a less commonly used port
 def main(host, port):
     """Starts the Semantic Kernel Agent server using A2A."""
     logger.info(f"Starting Currency Agent server on {host}:{port}")

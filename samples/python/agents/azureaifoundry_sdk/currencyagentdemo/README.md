@@ -117,7 +117,7 @@ uv run .
 
 - Testing in Thunder Client VS Code Extension 
 
-  - INPUT Endpoint http://localhost:10020 
+  - INPUT Endpoint http://localhost:47128
 
   - Add Post Body
 
