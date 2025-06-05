@@ -55,7 +55,7 @@ cd samples/python/agents/semantickernel
 
 2. **Configure environment variables**:
 
-Create a `.env` file based on `.envexample` file. The agent automatically detects whether to use Azure OpenAI or standard OpenAI based on which environment variables are set.
+Create a `.env` file based on `.envexample` file. The agent uses Azure OpenAI by default. To use OpenAI instead, you'll need to modify the code in `agent.py`.
 
 **For OpenAI:**
 
@@ -73,8 +73,14 @@ AZURE_OPENAI_CHAT_DEPLOYMENT_NAME="your-deployment-name"
 AZURE_OPENAI_API_VERSION="2024-12-01-preview"
 ```
 
-> [!NOTE]
-> The agent will use Azure OpenAI if all four Azure variables are set, otherwise it will use standard OpenAI if both OpenAI variables are set.
+To switch from Azure OpenAI to OpenAI, change this line in `agent.py`:
+
+```python
+# From this:
+chat_service = get_chat_completion_service(ChatServices.AZURE_OPENAI)
+# To this:
+chat_service = get_chat_completion_service(ChatServices.OPENAI)
+```
 
 > [!NOTE]
 > Other LLMs can be used as well, but you will need to modify the code to use the appropriate AI connector via the chat completion service method. See Semantic Kernel [documentation](https://learn.microsoft.com/en-us/semantic-kernel/concepts/ai-services/chat-completion/?tabs=csharp-AzureOpenAI%2Cpython-AzureOpenAI%2Cjava-AzureOpenAI&pivots=programming-language-python#creating-a-chat-completion-service) for more details on how to configure other AI services.
