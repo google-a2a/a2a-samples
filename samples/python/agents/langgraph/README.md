@@ -109,25 +109,22 @@ POST http://localhost:10000
 Content-Type: application/json
 
 {
-  "jsonrpc": "2.0",
-  "id": 11,
-  "method": "tasks/send",
-  "params": {
-    "id": "129",
-    "sessionId": "8f01f3d172cd4396a0e535ae8aec6687",
-    "acceptedOutputModes": [
-      "text"
-    ],
-    "message": {
-      "role": "user",
-      "parts": [
-        {
-          "type": "text",
-          "text": "How much is the exchange rate for 1 USD to INR?"
+    "id": "12113c25-b752-473f-977e-c9ad33cf4f56",
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "params": {
+        "message": {
+            "kind": "message",
+            "messageId": "120ec73f93024993becf954d03a672bc",
+            "parts": [
+                {
+                    "kind": "text",
+                    "text": "how much is 10 USD in INR?"
+                }
+            ],
+            "role": "user"
         }
-      ]
     }
-  }
 }
 ```
 
@@ -135,27 +132,69 @@ Response:
 
 ```
 {
-  "jsonrpc": "2.0",
-  "id": 11,
-  "result": {
-    "id": "129",
-    "status": {
-      "state": "completed",
-      "timestamp": "2025-04-02T16:53:29.301828"
-    },
-    "artifacts": [
-      {
-        "parts": [
-          {
-            "type": "text",
-            "text": "The exchange rate for 1 USD to INR is 85.49."
-          }
+    "id": "12113c25-b752-473f-977e-c9ad33cf4f56",
+    "jsonrpc": "2.0",
+    "result": {
+        "artifacts": [
+            {
+                "artifactId": "08373241-a745-4abe-a78b-9ca60882bcc6",
+                "name": "conversion_result",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "10 USD is 856.2 INR."
+                    }
+                ]
+            }
         ],
-        "index": 0
-      }
-    ],
-    "history": []
-  }
+        "contextId": "e329f200-eaf4-4ae9-a8ef-a33cf9485367",
+        "history": [
+            {
+                "contextId": "e329f200-eaf4-4ae9-a8ef-a33cf9485367",
+                "kind": "message",
+                "messageId": "120ec73f93024993becf954d03a672bc",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "how much is 10 USD in INR?"
+                    }
+                ],
+                "role": "user",
+                "taskId": "58124b63-dd3b-46b8-bf1d-1cc1aefd1c8f"
+            },
+            {
+                "contextId": "e329f200-eaf4-4ae9-a8ef-a33cf9485367",
+                "kind": "message",
+                "messageId": "d8b4d7de-709f-40f7-ae0c-fd6ee398a2bf",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "Looking up the exchange rates..."
+                    }
+                ],
+                "role": "agent",
+                "taskId": "58124b63-dd3b-46b8-bf1d-1cc1aefd1c8f"
+            },
+            {
+                "contextId": "e329f200-eaf4-4ae9-a8ef-a33cf9485367",
+                "kind": "message",
+                "messageId": "ee0cb3b6-c3d6-4316-8d58-315c437a2a77",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "Processing the exchange rates.."
+                    }
+                ],
+                "role": "agent",
+                "taskId": "58124b63-dd3b-46b8-bf1d-1cc1aefd1c8f"
+            }
+        ],
+        "id": "58124b63-dd3b-46b8-bf1d-1cc1aefd1c8f",
+        "kind": "task",
+        "status": {
+            "state": "completed"
+        }
+    }
 }
 ```
 
@@ -168,25 +207,22 @@ POST http://localhost:10000
 Content-Type: application/json
 
 {
-  "jsonrpc": "2.0",
-  "id": 10,
-  "method": "tasks/send",
-  "params": {
-    "id": "130",
-    "sessionId": "a9bb617f2cd94bd585da0f88ce2ddba2",
-    "acceptedOutputModes": [
-      "text"
-    ],
-    "message": {
-      "role": "user",
-      "parts": [
-        {
-          "type": "text",
-          "text": "How much is the exchange rate for 1 USD?"
+    "id": "27be771b-708f-43b8-8366-968966d07ec0",
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "params": {
+        "message": {
+            "kind": "message",
+            "messageId": "296eafc9233142bd98279e4055165f12",
+            "parts": [
+                {
+                    "kind": "text",
+                    "text": "How much is the exchange rate for 1 USD?"
+                }
+            ],
+            "role": "user"
         }
-      ]
     }
-  }
 }
 ```
 
@@ -194,25 +230,44 @@ Response - Seq 2:
 
 ```
 {
-  "jsonrpc": "2.0",
-  "id": 10,
-  "result": {
-    "id": "130",
-    "status": {
-      "state": "input-required",
-      "message": {
-        "role": "agent",
-        "parts": [
-          {
-            "type": "text",
-            "text": "Which currency do you want to convert to? Also, do you want the latest exchange rate or a specific date?"
-          }
-        ]
-      },
-      "timestamp": "2025-04-02T16:57:02.336787"
-    },
-    "history": []
-  }
+    "id": "27be771b-708f-43b8-8366-968966d07ec0",
+    "jsonrpc": "2.0",
+    "result": {
+        "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+        "history": [
+            {
+                "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+                "kind": "message",
+                "messageId": "296eafc9233142bd98279e4055165f12",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "How much is the exchange rate for 1 USD?"
+                    }
+                ],
+                "role": "user",
+                "taskId": "9d94c2d4-06e4-40e1-876b-22f5a2666e61"
+            }
+        ],
+        "id": "9d94c2d4-06e4-40e1-876b-22f5a2666e61",
+        "kind": "task",
+        "status": {
+            "message": {
+                "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+                "kind": "message",
+                "messageId": "f0f5f3ff-335c-4e77-9b4a-01ff3908e7be",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "Please specify which currency you would like to convert to."
+                    }
+                ],
+                "role": "agent",
+                "taskId": "9d94c2d4-06e4-40e1-876b-22f5a2666e61"
+            },
+            "state": "input-required"
+        }
+    }
 }
 ```
 
@@ -223,25 +278,24 @@ POST http://localhost:10000
 Content-Type: application/json
 
 {
-  "jsonrpc": "2.0",
-  "id": 10,
-  "method": "tasks/send",
-  "params": {
-    "id": "130",
-    "sessionId": "a9bb617f2cd94bd585da0f88ce2ddba2",
-    "acceptedOutputModes": [
-      "text"
-    ],
-    "message": {
-      "role": "user",
-      "parts": [
-        {
-          "type": "text",
-          "text": "CAD"
+    "id": "b88d818d-1192-42be-b4eb-3ee6b96a7e35",
+    "jsonrpc": "2.0",
+    "method": "message/send",
+    "params": {
+        "message": {
+            "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+            "kind": "message",
+            "messageId": "70371e1f231f4597b65ccdf534930ca9",
+            "parts": [
+                {
+                    "kind": "text",
+                    "text": "CAD"
+                }
+            ],
+            "role": "user",
+            "taskId": "9d94c2d4-06e4-40e1-876b-22f5a2666e61"
         }
-      ]
     }
-  }
 }
 ```
 
@@ -249,27 +303,95 @@ Response - Seq 4:
 
 ```
 {
-  "jsonrpc": "2.0",
-  "id": 10,
-  "result": {
-    "id": "130",
-    "status": {
-      "state": "completed",
-      "timestamp": "2025-04-02T16:57:40.033328"
-    },
-    "artifacts": [
-      {
-        "parts": [
-          {
-            "type": "text",
-            "text": "The current exchange rate is 1 USD = 1.4328 CAD."
-          }
+    "id": "b88d818d-1192-42be-b4eb-3ee6b96a7e35",
+    "jsonrpc": "2.0",
+    "result": {
+        "artifacts": [
+            {
+                "artifactId": "08373241-a745-4abe-a78b-9ca60882bcc6",
+                "name": "conversion_result",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "The exchange rate for 1 USD to CAD is 1.3739."
+                    }
+                ]
+            }
         ],
-        "index": 0
-      }
-    ],
-    "history": []
-  }
+        "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+        "history": [
+            {
+                "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+                "kind": "message",
+                "messageId": "296eafc9233142bd98279e4055165f12",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "How much is the exchange rate for 1 USD?"
+                    }
+                ],
+                "role": "user",
+                "taskId": "9d94c2d4-06e4-40e1-876b-22f5a2666e61"
+            },
+            {
+                "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+                "kind": "message",
+                "messageId": "f0f5f3ff-335c-4e77-9b4a-01ff3908e7be",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "Please specify which currency you would like to convert to."
+                    }
+                ],
+                "role": "agent",
+                "taskId": "9d94c2d4-06e4-40e1-876b-22f5a2666e61"
+            },
+            {
+                "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+                "kind": "message",
+                "messageId": "70371e1f231f4597b65ccdf534930ca9",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "CAD"
+                    }
+                ],
+                "role": "user",
+                "taskId": "9d94c2d4-06e4-40e1-876b-22f5a2666e61"
+            },
+            {
+                "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+                "kind": "message",
+                "messageId": "0eb4f200-a8cd-4d34-94f8-4d223eb1b2c0",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "Looking up the exchange rates..."
+                    }
+                ],
+                "role": "agent",
+                "taskId": "9d94c2d4-06e4-40e1-876b-22f5a2666e61"
+            },
+            {
+                "contextId": "a7cc0bef-17b5-41fc-9379-40b99f46a101",
+                "kind": "message",
+                "messageId": "41c7c03a-a772-4dc8-a868-e8c7b7defc91",
+                "parts": [
+                    {
+                        "kind": "text",
+                        "text": "Processing the exchange rates.."
+                    }
+                ],
+                "role": "agent",
+                "taskId": "9d94c2d4-06e4-40e1-876b-22f5a2666e61"
+            }
+        ],
+        "id": "9d94c2d4-06e4-40e1-876b-22f5a2666e61",
+        "kind": "task",
+        "status": {
+            "state": "completed"
+        }
+    }
 }
 ```
 
@@ -279,38 +401,37 @@ Request:
 
 ```
 {
-  "jsonrpc": "2.0",
-  "id": 12,
-  "method": "tasks/sendSubscribe",
-  "params": {
-    "id": "131",
-    "sessionId": "cebd704d0ddd4e8aa646aeb123d60614",
-    "acceptedOutputModes": [
-      "text"
-    ],
-    "message": {
-      "role": "user",
-      "parts": [
-        {
-          "type": "text",
-          "text": "How much is 100 USD in GBP?"
+    "id": "6d12d159-ec67-46e6-8d43-18480ce7f6ca",
+    "jsonrpc": "2.0",
+    "method": "message/stream",
+    "params": {
+        "message": {
+            "kind": "message",
+            "messageId": "2f9538ef0984471aa0d5179ce3c67a28",
+            "parts": [
+                {
+                    "kind": "text",
+                    "text": "how much is 10 USD in INR?"
+                }
+            ],
+            "role": "user"
         }
-      ]
     }
-  }
 }
 ```
 
 Response:
 
 ```
-data: {"jsonrpc":"2.0","id":12,"result":{"id":"131","status":{"state":"working","message":{"role":"agent","parts":[{"type":"text","text":"Looking up the exchange rates..."}]},"timestamp":"2025-04-02T16:59:34.578939"},"final":false}}
+data: {"id":"6d12d159-ec67-46e6-8d43-18480ce7f6ca","jsonrpc":"2.0","result":{"contextId":"cd09e369-340a-4563-bca4-e5f2e0b9ff81","history":[{"contextId":"cd09e369-340a-4563-bca4-e5f2e0b9ff81","kind":"message","messageId":"2f9538ef0984471aa0d5179ce3c67a28","parts":[{"kind":"text","text":"how much is 10 USD in INR?"}],"role":"user","taskId":"423a2569-f272-4d75-a4d1-cdc6682188e5"}],"id":"423a2569-f272-4d75-a4d1-cdc6682188e5","kind":"task","status":{"state":"submitted"}}}
 
-data: {"jsonrpc":"2.0","id":12,"result":{"id":"131","status":{"state":"working","message":{"role":"agent","parts":[{"type":"text","text":"Processing the exchange rates.."}]},"timestamp":"2025-04-02T16:59:34.737052"},"final":false}}
+data: {"id":"6d12d159-ec67-46e6-8d43-18480ce7f6ca","jsonrpc":"2.0","result":{"contextId":"cd09e369-340a-4563-bca4-e5f2e0b9ff81","final":false,"kind":"status-update","status":{"message":{"contextId":"cd09e369-340a-4563-bca4-e5f2e0b9ff81","kind":"message","messageId":"1854a825-c64f-4f30-96f2-c8aa558b83f9","parts":[{"kind":"text","text":"Looking up the exchange rates..."}],"role":"agent","taskId":"423a2569-f272-4d75-a4d1-cdc6682188e5"},"state":"working"},"taskId":"423a2569-f272-4d75-a4d1-cdc6682188e5"}}
 
-data: {"jsonrpc":"2.0","id":12,"result":{"id":"131","artifact":{"parts":[{"type":"text","text":"Based on the current exchange rate, 1 USD is equivalent to 0.77252 GBP. Therefore, 100 USD would be approximately 77.252 GBP."}],"index":0,"append":false}}}
+data: {"id":"6d12d159-ec67-46e6-8d43-18480ce7f6ca","jsonrpc":"2.0","result":{"contextId":"cd09e369-340a-4563-bca4-e5f2e0b9ff81","final":false,"kind":"status-update","status":{"message":{"contextId":"cd09e369-340a-4563-bca4-e5f2e0b9ff81","kind":"message","messageId":"e72127a6-4830-4320-bf23-235ac79b9a13","parts":[{"kind":"text","text":"Processing the exchange rates.."}],"role":"agent","taskId":"423a2569-f272-4d75-a4d1-cdc6682188e5"},"state":"working"},"taskId":"423a2569-f272-4d75-a4d1-cdc6682188e5"}}
 
-data: {"jsonrpc":"2.0","id":12,"result":{"id":"131","status":{"state":"completed","timestamp":"2025-04-02T16:59:35.331844"},"final":true}}
+data: {"id":"6d12d159-ec67-46e6-8d43-18480ce7f6ca","jsonrpc":"2.0","result":{"artifact":{"artifactId":"08373241-a745-4abe-a78b-9ca60882bcc6","name":"conversion_result","parts":[{"kind":"text","text":"10 USD is 856.2 INR."}]},"contextId":"cd09e369-340a-4563-bca4-e5f2e0b9ff81","kind":"artifact-update","taskId":"423a2569-f272-4d75-a4d1-cdc6682188e5"}}
+
+data: {"id":"6d12d159-ec67-46e6-8d43-18480ce7f6ca","jsonrpc":"2.0","result":{"contextId":"cd09e369-340a-4563-bca4-e5f2e0b9ff81","final":true,"kind":"status-update","status":{"state":"completed"},"taskId":"423a2569-f272-4d75-a4d1-cdc6682188e5"}}
 ```
 
 ## Learn More
