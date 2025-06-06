@@ -28,8 +28,8 @@ logger = logging.getLogger(__name__)
 class CurrencyAgentExecutor(AgentExecutor):
     """Currency Conversion AgentExecutor Example."""
 
-    def __init__(self):
-        self.agent = CurrencyAgent()
+    def __init__(self, tool_llm_url=None, tool_llm_name=None):
+        self.agent = CurrencyAgent(tool_llm_name=tool_llm_name, tool_llm_url=tool_llm_url)
 
     async def execute(
         self,

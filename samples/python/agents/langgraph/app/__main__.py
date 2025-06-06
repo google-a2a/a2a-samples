@@ -33,12 +33,19 @@ class MissingAPIKeyError(Exception):
 @click.command()
 @click.option('--host', 'host', default='localhost')
 @click.option('--port', 'port', default=10000)
-def main(host, port):
+@click.option('--tool-llm-url', 'tool_llm_url', default=os.getenv('TOOL_LLM_URL'))
+@click.option('--tool-llm-name', 'tool_llm_name', default=os.getenv('TOOL_LLM_NAME'))
+def main(host, port, tool_llm_url, tool_llm_name):
     """Starts the Currency Agent server."""
     try:
-        if not os.getenv('GOOGLE_API_KEY'):
+    
+        if not tool_llm_url:
             raise MissingAPIKeyError(
-                'GOOGLE_API_KEY environment variable not set.'
+                'TOOL_LLM_URL not provided. Please set it as an environment variable or pass it as --tool-llm-url parameter.'
+            )
+        if not tool_llm_name:
+            raise MissingAPIKeyError(
+                'TOOL_LLM_NAME not provided. Please set it as an environment variable or pass it as --tool-llm-name parameter.'
             )
 
         capabilities = AgentCapabilities(streaming=True, pushNotifications=True)
@@ -63,7 +70,7 @@ def main(host, port):
         # --8<-- [start:DefaultRequestHandler]
         httpx_client = httpx.AsyncClient()
         request_handler = DefaultRequestHandler(
-            agent_executor=CurrencyAgentExecutor(),
+            agent_executor=CurrencyAgentExecutor(tool_llm_url=tool_llm_url, tool_llm_name=tool_llm_name),
             task_store=InMemoryTaskStore(),
             push_notifier=InMemoryPushNotifier(httpx_client),
         )
