@@ -1,0 +1,84 @@
+spring:
+  application:
+    name: a2a-server-example-spring-ai
+  ai:
+    openai:
+      base-url: ${OPENAI_BASE_URL:https://api.openai.com}
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        options:
+          model: ${OPENAI_CHAT_MODEL:gpt-4o}
+          temperature: 0.3
+
+server:
+  port: 8080
+
+a2a:
+  server:
+    agent-name: "AI Multilingual Translation Assistant"
+    agent-description: "Advanced AI translation service based on A2A protocol, supporting English, Spanish, French, German, and Italian translations with high-quality AI models"
+    agent-version: "1.0.0"
+    base-url: "http://localhost:8080"
+    docs-url: "http://localhost:8080/docs"
+    icon-url: "http://localhost:8080/icon.png"
+
+    # Feature toggles
+    streaming-enabled: true
+    push-notifications-enabled: true
+    state-transition-history-enabled: false
+    supports-authenticated-extended-card: true
+
+    # Provider information
+    provider:
+      name: "A2A Examples Corporation"
+      url: "https://github.com/google/a2a-samples"
+
+    # Supported content types
+    input-content-types:
+      - "application/json"
+      - "text/plain"
+    output-content-types:
+      - "application/json"
+      - "text/plain"
+
+    # Authentication methods (optional)
+    authentication-methods:
+      - "Bearer"
+
+    # Agent skill configuration
+    skills:
+      - id: "translation"
+        name: "Multilingual Translation"
+        description: "Professional multilingual translation service supporting English, Spanish, French, German, and Italian. Powered by advanced AI models for accurate, natural, and fluent translations."
+        tags:
+          - "translation"
+          - "multilingual"
+          - "AI"
+          - "English"
+          - "Spanish"
+          - "French"
+          - "German"
+          - "Italian"
+          - "natural language processing"
+        examples:
+          - "Translate: Good morning everyone"
+          - "Please translate this English text: How are you today?"
+          - "Translate this Spanish phrase: Hola, ¿cómo estás?"
+          - "Convert this French sentence to German: Bonjour le monde"
+          - "Translate this German text to Italian: Guten Tag, wie geht es dir?"
+          - "Please translate this Italian phrase to English: Ciao, come stai?"
+        input-content-types:
+          - "text/plain"
+          - "application/json"
+        output-content-types:
+          - "text/plain"
+          - "application/json"
+
+# Logging configuration
+logging:
+  level:
+    com.google.a2a: DEBUG
+    org.springframework.ai: INFO
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
