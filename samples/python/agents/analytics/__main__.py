@@ -38,11 +38,11 @@ def main(host, port):
     try:
         capabilities = AgentCapabilities(streaming=False)
         skill = AgentSkill(
-            id='image_generator',
-            name='Image Generator',
+            id='chart_generator',
+            name='Chart Generator',
             description='Generate a chart based on CSV-like data passed in',
             tags=['generate image', 'edit image'],
-            examples=['Generate a photorealistic image of raspberry lemonade'],
+            examples=['Generate a chart of revenue: Jan,$1000 Feb,$2000 Mar,$1500'],
         )
 
         agent_card = AgentCard(
