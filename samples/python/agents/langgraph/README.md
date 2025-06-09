@@ -4,7 +4,7 @@ This sample demonstrates a currency conversion agent built with [LangGraph](http
 
 ## How It Works
 
-This agent uses LangGraph with Google Gemini to provide currency exchange information through a ReAct agent pattern. The A2A protocol enables standardized interaction with the agent, allowing clients to send requests and receive real-time updates.
+This agent uses LangGraph with LLM (for example Google Gemini..) to provide currency exchange information through a ReAct agent pattern. The A2A protocol enables standardized interaction with the agent, allowing clients to send requests and receive real-time updates.
 
 ```mermaid
 sequenceDiagram
@@ -65,7 +65,16 @@ sequenceDiagram
 2. Create an environment file with your API key:
 
    ```bash
+   If you're using a Google Gemini model (gemini-pro, etc.):
    echo "GOOGLE_API_KEY=your_api_key_here" > .env
+  
+   
+   If you're using OpenAI or any compatible API (e.g., local LLM via Ollama, LM Studio, etc.):
+
+   echo "API_KEY=your_api_key_here" > .env  (not neccessary if have no api key)
+   echo "TOOL_LLM_URL=your_llm_url" > .env
+   echo "TOOL_LLM_NAME=your_llm_name" > .env
+
    ```
 
 3. Run the agent:
@@ -83,6 +92,37 @@ sequenceDiagram
    ```bash
    uv run app/test_client.py
    ```
+
+## Build Container Image
+
+Agent can also be built using a container file.
+
+1. Navigate to the `samples/python/agents/langgraph` directory:
+
+  ```bash
+  cd samples/python/agents/langgraph
+  ```
+
+2. Build the container file
+
+    ```bash
+    podman build . -t langgraph-a2a-server
+    ```
+
+> [!Tip]  
+> Podman is a drop-in replacement for `docker` which can also be used in these commands.
+
+3. Run you container
+
+    ```bash
+    podman run -p 10000:10000 -e GOOGLE_API_KEY=your_api_key_here langgraph-a2a-server
+    ```
+
+4. Run A2A client (follow step 5 from the section above)
+
+> [!Important]
+> * **Access URL:** You must access the A2A client through the URL `0.0.0.0:10000`. Using `localhost` will not work.
+> * **Hostname Override:** If you're deploying to an environment where the hostname is defined differently outside the container, use the `HOST_OVERRIDE` environment variable to set the expected hostname on the Agent Card. This ensures proper communication with your client application.
 
 ## Technical Implementation
 
