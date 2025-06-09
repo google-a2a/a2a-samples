@@ -103,6 +103,37 @@ python -m agents.autogen --host 0.0.0.0 --port 8000
 }
 ```
 
+## Build Container Image
+
+Agent can also be built using a container file.
+
+1. Navigate to the `samples/python` directory:
+
+  ```bash
+  cd samples/python
+  ```
+
+2. Build the container file
+
+    ```bash
+    podman build -f agents/ag2/Containerfile . -t ag2-a2a-server
+    ```
+
+> [!Tip]  
+> Podman is a drop-in replacement for `docker` which can also be used in these commands.
+
+3. Run you container
+
+    ```bash
+    podman run -p 10010:10010 -e OPENAI_API_KEY=your_api_key_here ag2-a2a-server
+    ```
+
+4. Run A2A client (follow step 5 from the section above)
+
+> [!Important]
+> * **Access URL:** You must access the A2A client through the URL `0.0.0.0:10010`. Using `localhost` will not work.
+> * **Hostname Override:** If you're deploying to an environment where the hostname is defined differently outside the container, use the `HOST_OVERRIDE` environment variable to set the expected hostname on the Agent Card. This ensures proper communication with your client application.
+
 ## Development
 
 The agent uses AutoGen to orchestrate interactions between:
