@@ -112,7 +112,7 @@ Agent can also be built using a container file.
 > [!Tip]  
 > Podman is a drop-in replacement for `docker` which can also be used in these commands.
 
-3. Run you container
+3. Run your container
 
     ```bash
     podman run -p 10000:10000 -e GOOGLE_API_KEY=your_api_key_here langgraph-a2a-server
