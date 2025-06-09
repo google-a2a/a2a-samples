@@ -126,6 +126,40 @@ cd samples/python/hosts/cli
 uv run . --agent http://localhost:10020
 ```
 
+## Build Container Image
+
+Agent can also be built using a container file.
+
+1. Navigate to the `samples/python` directory:
+
+  ```bash
+  cd samples/python
+  ```
+
+2. Build the container file
+
+    ```bash
+    podman build -f agents/semantickernel/Containerfile . -t semantickernel-a2a-server
+    ```
+
+> [!Tip]  
+> Podman is a drop-in replacement for `docker` which can also be used in these commands.
+
+3. Run you container
+
+    ```bash
+    podman run -p 10020:10020 -e OPENAI_API_KEY=your_api_key_here -e OPENAI_MODEL_ID=your-model-id semantickernel-a2a-server
+    ```
+
+> [!NOTE]
+> To use Azure replace with environment variables from previous section.
+
+4. Run A2A client (follow step 5 from the section above)
+
+> [!Important]
+> * **Access URL:** You must access the A2A client through the URL `0.0.0.0:10020`. Using `localhost` will not work.
+> * **Hostname Override:** If you're deploying to an environment where the hostname is defined differently outside the container, use the `HOST_OVERRIDE` environment variable to set the expected hostname on the Agent Card. This ensures proper communication with your client application.
+
 ## Limitations
 
 - Only text-based input/output for now
