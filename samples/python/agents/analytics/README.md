@@ -1,8 +1,12 @@
 ## Analytics Agent with A2A Protocol
 
-This sample demonstrates a lightweight analytics agent that generates **charts** (bar for now, will be enhanced to handle more chart types) from user prompts using [CrewAI](https://www.crewai.com/open-source), `pandas`, and `matplotlib`, and serves them via the [A2A Protocol](https://google.github.io/A2A/#/documentation).
+This sample demonstrates a lightweight analytics agent that generates **charts** (bar for now; will be enhanced to handle more chart types) from user prompts using [CrewAI](https://www.crewai.com/open-source), `pandas`, and `matplotlib`, and serves them via the [A2A Protocol](https://google.github.io/A2A/#/documentation).
+
+## YouTube [Tutorial](https://www.youtube.com/watch?v=FYEXKh9LxUU&t=9s)
 
 While initially focused on charting, this agent sets the foundation for more advanced analytics workflows.
+
+---
 
 ## What It Does
 
@@ -17,6 +21,8 @@ Example result:
 
 > 🧾 Prompt: `Generate a chart of revenue: Jan,$1000 Feb,$2000 Mar,$1500`  
 > 📊 Output: PNG image of a chart 
+
+---
 
 ## How It Works
 
@@ -35,7 +41,9 @@ sequenceDiagram
     Matplotlib-->>Agent: Return PNG
     Agent->>Server: Return image ID
     Server->>Client: Return image artifact
+```
 
+---
 
 ## Key Components
 
@@ -44,11 +52,15 @@ sequenceDiagram
 - **Image Generation**: Uses Gemini API to create images from text descriptions
 - **Cache System**: Stores generated images for retrieval (in-memory or file-based)
 
+---
+
 ## Prerequisites
 
 - Python 3.12 or higher
 - [UV](https://docs.astral.sh/uv/) package manager (recommended)
 - Google API Key (for Gemini access)
+
+---
 
 ## Setup & Running
 
@@ -61,7 +73,7 @@ sequenceDiagram
 2. Create an environment file with your API key (or Vertex AI credentials):
 
    ```bash
-   echo "OPENAI_API_KEY=your_openapi_key_here" > .env
+   echo "OPENAI_API_KEY=your_openai_key_here" > .env
    ```
 
 3. Set up the Python environment:
@@ -85,22 +97,27 @@ sequenceDiagram
 5. Run the A2A client:
 
    In a separate terminal:
+
    ```bash
-   # Connect to the agent (specify the agent URL with correct port)
-   cd samples/python/hosts/cli   
+   cd samples/python/hosts/cli
    uv run . --agent http://localhost:10011
-   
-   # If you changed the port when starting the agent, use that port instead
-   # uv run . --agent http://localhost:YOUR_PORT
+   ```
+
+   If you changed the agent's port when starting it, update the URL accordingly:
+
+   ```bash
+   uv run . --agent http://localhost:YOUR_PORT
    ```
 
    Or run the [demo app](/A2A/A2A/demo/README.md)
+
+---
 
 ## Features & Improvements
 
 **Features:**
 
-- Text-to-chart-image generation using Google Gemini and MatplotLib
+- Text-to-chart-image generation using Google Gemini and Matplotlib
 - Support for OpenAI and Gemini LLMs
 - Robust error handling with automatic retries
 - Optional file-based cache persistence
@@ -113,12 +130,17 @@ sequenceDiagram
 - No true streaming (CrewAI doesn't natively support it)
 - Limited agent interactions (no multi-turn conversations)
 
+---
+
 ## Learn More
 
 - [A2A Protocol Documentation](https://google.github.io/A2A/#/documentation)
 - [CrewAI Documentation](https://docs.crewai.com/introduction)
 - [Google Gemini API](https://ai.google.dev/gemini-api)
-- [Matplotlib Docs] (https://matplotlib.org/stable/index.html)
+- [Matplotlib Documentation](https://matplotlib.org/stable/index.html)
+
+---
 
 ## By
-Gabe Jakobson 2025
+
+Gabe Jakobson, 2025

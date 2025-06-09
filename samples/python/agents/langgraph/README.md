@@ -112,7 +112,7 @@ Agent can also be built using a container file.
 > [!Tip]  
 > Podman is a drop-in replacement for `docker` which can also be used in these commands.
 
-3. Run you container
+3. Run your container
 
     ```bash
     podman run -p 10000:10000 -e GOOGLE_API_KEY=your_api_key_here langgraph-a2a-server
@@ -319,23 +319,20 @@ Request:
 
 ```
 {
+  "id": "75",
   "jsonrpc": "2.0",
-  "id": 12,
-  "method": "tasks/sendSubscribe",
+  "method": "message/send",
   "params": {
-    "id": "131",
-    "sessionId": "cebd704d0ddd4e8aa646aeb123d60614",
-    "acceptedOutputModes": [
-      "text"
-    ],
     "message": {
-      "role": "user",
+      "kind": "message",
+      "messageId": "abc75",
       "parts": [
         {
-          "type": "text",
-          "text": "How much is 100 USD in GBP?"
+          "kind": "text",
+          "text": "How much is 75 USD in GBP?"
         }
-      ]
+      ],
+      "role": "user"
     }
   }
 }
@@ -343,7 +340,7 @@ Request:
 
 Response:
 
-```
+```json
 data: {"jsonrpc":"2.0","id":12,"result":{"id":"131","status":{"state":"working","message":{"role":"agent","parts":[{"type":"text","text":"Looking up the exchange rates..."}]},"timestamp":"2025-04-02T16:59:34.578939"},"final":false}}
 
 data: {"jsonrpc":"2.0","id":12,"result":{"id":"131","status":{"state":"working","message":{"role":"agent","parts":[{"type":"text","text":"Processing the exchange rates.."}]},"timestamp":"2025-04-02T16:59:34.737052"},"final":false}}
