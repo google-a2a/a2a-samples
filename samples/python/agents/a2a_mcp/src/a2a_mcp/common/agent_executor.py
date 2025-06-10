@@ -44,7 +44,7 @@ class GenericAgentExecutor(AgentExecutor):
 
         if not task:
             task = new_task(context.message)
-            event_queue.enqueue_event(task)
+            await event_queue.enqueue_event(task)
 
         updater = TaskUpdater(event_queue, task.id, task.contextId)
 
@@ -59,7 +59,7 @@ class GenericAgentExecutor(AgentExecutor):
                     event,
                     (TaskStatusUpdateEvent | TaskArtifactUpdateEvent),
                 ):
-                    event_queue.enqueue_event(event)
+                    await event_queue.enqueue_event(event)
                 continue
 
             is_task_complete = item['is_task_complete']

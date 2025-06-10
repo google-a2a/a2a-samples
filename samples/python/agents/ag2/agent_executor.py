@@ -33,7 +33,7 @@ class AG2AgentExecutor(AgentExecutor):
         task = context.current_task
         if not task:
             task = new_task(context.message)
-            event_queue.enqueue_event(task)
+            await event_queue.enqueue_event(task)
 
         async for item in self.agent.stream(query, task.contextId):
             is_task_complete = item['is_task_complete']
@@ -45,7 +45,7 @@ class AG2AgentExecutor(AgentExecutor):
             )
 
             if not is_task_complete and not require_user_input:
-                event_queue.enqueue_event(
+                await event_queue.enqueue_event(
                     TaskStatusUpdateEvent(
                         status=TaskStatus(
                             state=TaskState.working,
@@ -61,7 +61,7 @@ class AG2AgentExecutor(AgentExecutor):
                     )
                 )
             elif require_user_input:
-                event_queue.enqueue_event(
+                await event_queue.enqueue_event(
                     TaskStatusUpdateEvent(
                         status=TaskStatus(
                             state=TaskState.input_required,
@@ -77,7 +77,7 @@ class AG2AgentExecutor(AgentExecutor):
                     )
                 )
             else:
-                event_queue.enqueue_event(
+                await event_queue.enqueue_event(
                     TaskArtifactUpdateEvent(
                         append=False,
                         contextId=task.contextId,
@@ -90,7 +90,7 @@ class AG2AgentExecutor(AgentExecutor):
                         ),
                     )
                 )
-                event_queue.enqueue_event(
+                await event_queue.enqueue_event(
                     TaskStatusUpdateEvent(
                         status=TaskStatus(state=TaskState.completed),
                         final=True,
