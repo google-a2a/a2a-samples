@@ -1,9 +1,13 @@
 import json
-from typing import Any, Dict, Optional
+
+from typing import Any
+
 import httpx
-from mcp.server.fastmcp import FastMCP
+
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut
 from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+from mcp.server.fastmcp import FastMCP
+
 
 # Initialize FastMCP server
 mcp = FastMCP("weather")
@@ -27,10 +31,14 @@ http_client = httpx.AsyncClient(
 geolocator = Nominatim(user_agent=USER_AGENT)
 
 
-async def get_weather_response(endpoint: str) -> Optional[Dict[str, Any]]:
-    """
-    Make a request to the NWS API using the shared client with error handling.
-    Returns None if an error occurs.
+async def get_weather_response(endpoint: str) -> dict[str, Any] | None:
+    """Make a request to the NWS API using the shared client with error handling.
+
+    Args:
+        endpoint: The endpoint to request.
+
+    Returns:
+        The response from the NWS API, or None if an error occurs.
     """
     try:
         response = await http_client.get(endpoint)
@@ -53,7 +61,7 @@ async def get_weather_response(endpoint: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def format_alert(feature: Dict[str, Any]) -> str:
+def format_alert(feature: dict[str, Any]) -> str:
     """Format an alert feature into a readable string."""
     props = feature.get("properties", {})  # Safer access
     # Use .get() with default values for robustness
@@ -70,7 +78,7 @@ def format_alert(feature: Dict[str, Any]) -> str:
             """
 
 
-def format_forecast_period(period: Dict[str, Any]) -> str:
+def format_forecast_period(period: dict[str, Any]) -> str:
     """Formats a single forecast period into a readable string."""
     return f"""
            {period.get('name', 'Unknown Period')}:
@@ -86,8 +94,7 @@ def format_forecast_period(period: Dict[str, Any]) -> str:
 
 @mcp.tool()
 async def get_alerts(state: str) -> str:
-    """
-    Get active weather alerts for a specific US state.
+    """Get active weather alerts for a specific US state.
 
     Args:
         state: The two-letter US state code (e.g., CA, NY, TX). Case-insensitive.
@@ -114,8 +121,7 @@ async def get_alerts(state: str) -> str:
 
 @mcp.tool()
 async def get_forecast(latitude: float, longitude: float) -> str:
-    """
-    Get the weather forecast for a specific location using latitude and longitude.
+    """Get the weather forecast for a specific location using latitude and longitude.
 
     Args:
         latitude: The latitude of the location (e.g., 34.05).
@@ -169,8 +175,7 @@ async def get_forecast(latitude: float, longitude: float) -> str:
 # --- NEW: get_forecast_by_city Tool ---
 @mcp.tool()
 async def get_forecast_by_city(city: str, state: str) -> str:
-    """
-    Get the weather forecast for a specific US city and state by first finding its coordinates.
+    """Get the weather forecast for a specific US city and state by first finding its coordinates.
 
     Args:
         city: The name of the city (e.g., "Los Angeles", "New York").
@@ -221,7 +226,6 @@ async def get_forecast_by_city(city: str, state: str) -> str:
 async def shutdown_event():
     """Gracefully close the httpx client."""
     await http_client.aclose()
-    # print("HTTP client closed.") # Optional print statement if desired
 
 
 if __name__ == "__main__":

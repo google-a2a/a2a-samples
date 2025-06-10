@@ -1,9 +1,8 @@
-from typing import Any, List
-
+# ruff: noqa: E501, G201, G202
+# pylint: disable=logging-fstring-interpolation
 import logging
-from agent import AirbnbAgent
 
-from typing_extensions import override
+from typing import Any, override
 
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events.event_queue import EventQueue
@@ -14,7 +13,10 @@ from a2a.types import (
     TaskStatusUpdateEvent,
 )
 from a2a.utils import new_agent_text_message, new_task, new_text_artifact
-from uuid import uuid4
+from agents.airbnb_planner_multiagent.airbnb_agent.airbnb_agent import (
+    AirbnbAgent,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +24,8 @@ logger = logging.getLogger(__name__)
 class AirbnbAgentExecutor(AgentExecutor):
     """AirbnbAgentExecutor that uses an agent with preloaded tools."""
 
-    def __init__(self, mcp_tools: List[Any]):
-        """
-        Initializes the AirbnbAgentExecutor.
+    def __init__(self, mcp_tools: list[Any]):
+        """Initializes the AirbnbAgentExecutor.
 
         Args:
             mcp_tools: A list of preloaded MCP tools for the AirbnbAgent.

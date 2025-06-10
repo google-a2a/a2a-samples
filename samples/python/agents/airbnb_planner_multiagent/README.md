@@ -68,7 +68,7 @@ Open a new terminal and run the host agent server
 
 ```bash
 cd samples/python/agents/airbnb_planner_multiagent/host_agent
-uv run app.py
+uv run .
 ```
 
 

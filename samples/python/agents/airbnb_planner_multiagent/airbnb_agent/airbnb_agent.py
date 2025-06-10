@@ -1,14 +1,17 @@
-import os
+# ruff: noqa: E501, G201, G202
+# pylint: disable=logging-fstring-interpolation
 import logging
-import asyncio
+import os
+
 from collections.abc import AsyncIterable
-from typing import Any, Literal, List
+from typing import Any, Literal
+
 import httpx
-from langchain_core.messages import AIMessage, ToolMessage, AIMessageChunk
+
+from langchain_core.messages import AIMessage, AIMessageChunk
 from langchain_core.runnables.config import (
     RunnableConfig,
 )
-
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_vertexai import ChatVertexAI
 from langgraph.checkpoint.memory import MemorySaver
@@ -31,7 +34,7 @@ class ResponseFormat(BaseModel):
 
 
 class AirbnbAgent:
-    """Currency Conversion Agent Example."""
+    """Airbnb Agent Example."""
 
     SYSTEM_INSTRUCTION = """You are a specialized assistant for Airbnb accommodations. Your primary function is to utilize the provided tools to search for Airbnb listings and answer related questions. You must rely exclusively on these tools for information; do not invent listings or prices. Ensure that your Markdown-formatted response includes all relevant tool output, with particular emphasis on providing direct links to listings"""
 
@@ -43,17 +46,18 @@ class AirbnbAgent:
 
     SUPPORTED_CONTENT_TYPES = ["text", "text/plain"]
 
-    def __init__(self, mcp_tools: List[Any]):  # Modified to accept mcp_tools
-        """
-        Initializes the Airbnb.
+    def __init__(self, mcp_tools: list[Any]):  # Modified to accept mcp_tools
+        """Initializes the Airbnb agent.
 
         Args:
-            mcp_tools: A list of preloaded MCP (Multi-Process Controller) tools.
+            mcp_tools: A list of preloaded MCP (Model Context Protocol) tools.
         """
         logger.info("Initializing AirbnbAgent with preloaded MCP tools...")
         try:
 
-            model = os.getenv("GOOGLE_GENAI_MODEL", "gemini-2.5-flash-preview-05-20")
+            model = os.getenv("GOOGLE_GENAI_MODEL")
+            if not model:
+                raise ValueError("GOOGLE_GENAI_MODEL environment variable is not set")
 
             if os.getenv("GOOGLE_GENAI_USE_VERTEXAI") == "TRUE":
                 # If not using Vertex AI, initialize with Google Generative AI
@@ -73,43 +77,14 @@ class AirbnbAgent:
 
         self.mcp_tools = mcp_tools
         if not self.mcp_tools:
-            logger.warning(
-                "AirbnbAgent initialized with no MCP tools. Weather search functionality may be limited."
-            )
-        else:
-            logger.info(
-                f"AirbnbAgent initialized with {len(self.mcp_tools)} MCP tools."
-            )
+            raise ValueError("No MCP tools provided to AirbnbAgent")
 
-    async def ainvoke(self, query: str, sessionId: str) -> dict[str, Any]:
+    async def ainvoke(self, query: str, session_id: str) -> dict[str, Any]:
         logger.info(
-            f"Airbnb.ainvoke (for Weather task) called with query: '{query}', sessionId: '{sessionId}'"
+            f"Airbnb.ainvoke called with query: '{query}', session_id: '{session_id}'"
         )
-        if not isinstance(sessionId, str) or not sessionId:
-            logger.error(
-                f"Invalid sessionId received in ainvoke: '{sessionId}'. Must be a non-empty string."
-            )
-            return {
-                "is_task_complete": True,
-                "require_user_input": False,
-                "content": "Internal error: Invalid session ID.",
-            }
         try:
-            # Use preloaded self.mcp_tools directly
-            if not self.mcp_tools:
-                logger.error(
-                    "No MCP tools available for Airbnb.ainvoke. Cannot perform weather search."
-                )
-                return {
-                    "is_task_complete": True,  # Or False if you want to signal an error state differently
-                    "require_user_input": False,
-                    "content": "I'm sorry, but the weather tool is currently unavailable. Please try again later.",
-                }
-            logger.debug(
-                f"Using preloaded MCP Tools for Weather task: {len(self.mcp_tools)} tools."
-            )
-
-            weather_agent_runnable = create_react_agent(
+            airbnb_agent_runnable = create_react_agent(
                 self.model,
                 tools=self.mcp_tools,  # Use preloaded tools
                 checkpointer=memory,
@@ -117,49 +92,49 @@ class AirbnbAgent:
                 response_format=(self.RESPONSE_FORMAT_INSTRUCTION, ResponseFormat),
             )
             logger.debug(
-                "LangGraph React agent for Weather task created/configured with preloaded tools."
+                "LangGraph React agent for Airbnb task created/configured with preloaded tools."
             )
 
-            config: RunnableConfig = {"configurable": {"thread_id": sessionId}}
+            config: RunnableConfig = {"configurable": {"thread_id": session_id}}
             langgraph_input = {"messages": [("user", query)]}
 
             logger.debug(
-                f"Invoking Weather agent with input: {langgraph_input} and config: {config}"
+                f"Invoking Airbnb agent with input: {langgraph_input} and config: {config}"
             )
 
-            await weather_agent_runnable.ainvoke(langgraph_input, config)
+            await airbnb_agent_runnable.ainvoke(langgraph_input, config)
             logger.debug(
-                "Weather agent ainvoke call completed. Fetching response from state..."
+                "Airbnb Agent ainvoke call completed. Fetching response from state..."
             )
 
             response = self._get_agent_response_from_state(
-                config, weather_agent_runnable
+                config, airbnb_agent_runnable
             )
             logger.info(
-                f"Response from Weather agent state for session {sessionId}: {response}"
+                f"Response from Airbnb Agent state for session {session_id}: {response}"
             )
             return response
 
         except httpx.HTTPStatusError as http_err:
             logger.error(
-                f"HTTPStatusError in Airbnb.ainvoke (Weather task): {http_err.response.status_code} - {http_err}",
+                f"HTTPStatusError in Airbnb.ainvoke (Airbnb task): {http_err.response.status_code} - {http_err}",
                 exc_info=True,
             )
             return {
                 "is_task_complete": True,
                 "require_user_input": False,
-                "content": f"An error occurred with an external service for Weather task: {http_err.response.status_code}",
+                "content": f"An error occurred with an external service for Airbnb task: {http_err.response.status_code}",
             }
         except Exception as e:
             logger.error(
-                f"Unhandled exception in AirbnbAgent.ainvoke (Weather task): {type(e).__name__} - {e}",
+                f"Unhandled exception in AirbnbAgent.ainvoke (Airbnb task): {type(e).__name__} - {e}",
                 exc_info=True,
             )
             # Consider whether to re-raise or return a structured error
             return {
                 "is_task_complete": True,  # Or False, marking task as errored
                 "require_user_input": False,
-                "content": f"An unexpected error occurred while processing your weather request: {type(e).__name__}.",
+                "content": f"An unexpected error occurred while processing your airbnb task: {type(e).__name__}.",
             }
             # Or re-raise if the executor should handle it:
             # raise
@@ -167,9 +142,7 @@ class AirbnbAgent:
     def _get_agent_response_from_state(
         self, config: RunnableConfig, agent_runnable
     ) -> dict[str, Any]:
-        """
-        Retrieves and formats the agent's response from the state of the given agent_runnable.
-        """
+        """Retrieves and formats the agent's response from the state of the given agent_runnable."""
         logger.debug(
             f"Entering _get_agent_response_from_state for config: {config} using agent: {type(agent_runnable).__name__}"
         )
@@ -287,30 +260,9 @@ class AirbnbAgent:
         }
 
     # stream method would also use self.mcp_tools if it similarly creates an agent instance
-    async def stream(self, query: str, sessionId: str) -> AsyncIterable[Any]:
+    async def stream(self, query: str, session_id: str) -> AsyncIterable[Any]:
         logger.info(
-            f"AirbnbAgent.stream called with query: '{query}', sessionId: '{sessionId}'"
-        )
-        if not isinstance(sessionId, str) or not sessionId:
-            logger.error(f"Invalid sessionId received in stream: '{sessionId}'.")
-            yield {
-                "is_task_complete": True,
-                "require_user_input": False,
-                "content": "Internal error: Invalid session ID.",
-            }
-            return
-
-        if not self.mcp_tools:
-            logger.error("No MCP tools available for AirbnbAgent.stream.")
-            yield {
-                "is_task_complete": True,
-                "require_user_input": False,
-                "content": "The Airbnb search tool is currently unavailable for streaming.",
-            }
-            return
-
-        logger.debug(
-            f"Using preloaded MCP Tools for Weather stream: {len(self.mcp_tools)} tools."
+            f"AirbnbAgent.stream called with query: '{query}', sessionId: '{session_id}'"
         )
         agent_runnable = create_react_agent(
             self.model,
@@ -322,17 +274,17 @@ class AirbnbAgent:
                 ResponseFormat,
             ),  # Ensure final response can be structured
         )
-        config: RunnableConfig = {"configurable": {"thread_id": sessionId}}
+        config: RunnableConfig = {"configurable": {"thread_id": session_id}}
         langgraph_input = {"messages": [("user", query)]}
 
         logger.debug(
-            f"Streaming from Weather agent with input: {langgraph_input} and config: {config}"
+            f"Streaming from Airbnb Agent with input: {langgraph_input} and config: {config}"
         )
         try:
             async for chunk in agent_runnable.astream_events(
                 langgraph_input, config, version="v1"
             ):
-                logger.debug(f"Stream chunk for {sessionId}: {chunk}")
+                logger.debug(f"Stream chunk for {session_id}: {chunk}")
                 event_name = chunk.get("event")
                 data = chunk.get("data", {})
                 content_to_yield = None
@@ -348,7 +300,7 @@ class AirbnbAgent:
                         and message_chunk.content
                     ):
                         content_to_yield = message_chunk.content
-                
+
                 if content_to_yield:
                     yield {
                         "is_task_complete": False,
@@ -359,13 +311,13 @@ class AirbnbAgent:
             # After all events, get the final structured response from the agent's state
             final_response = self._get_agent_response_from_state(config, agent_runnable)
             logger.info(
-                f"Final response from state after stream for session {sessionId}: {final_response}"
+                f"Final response from state after stream for session {session_id}: {final_response}"
             )
             yield final_response
 
         except Exception as e:
             logger.error(
-                f"Error during AirbnbAgent.stream for session {sessionId}: {e}",
+                f"Error during AirbnbAgent.stream for session {session_id}: {e}",
                 exc_info=True,
             )
             yield {

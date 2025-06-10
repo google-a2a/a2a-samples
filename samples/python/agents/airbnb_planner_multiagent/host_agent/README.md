@@ -1,6 +1,10 @@
-# An example host agent frond end
+# An example host agent front end
 
-- Start the server
-    ```bash
-    uv run app.py
-    ```
+
+1. Create a .env file using the `.env.example` file as a template.
+
+2. Run the example
+
+   ```bash
+   uv run .
+   ```
