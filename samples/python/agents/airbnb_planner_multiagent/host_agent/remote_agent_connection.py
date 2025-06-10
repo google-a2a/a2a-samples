@@ -47,9 +47,6 @@ class RemoteAgentConnections:
             self._httpx_client, agent_card, url=agent_url
         )
         self.card = agent_card
-        self.conversation_name = None
-        self.conversation = None
-        self.pending_tasks = set()
 
     def get_agent(self) -> AgentCard:
         return self.card
@@ -57,6 +54,4 @@ class RemoteAgentConnections:
     async def send_message(
         self, message_request: SendMessageRequest
     ) -> SendMessageResponse:
-        return await self.agent_client.send_message(
-            message_request, http_kwargs={'timeout': 120}
-        )
+        return await self.agent_client.send_message(message_request)
