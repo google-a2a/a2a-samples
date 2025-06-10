@@ -1,25 +1,33 @@
+# ruff: noqa: E501, G201, G202
+# pylint: disable=logging-fstring-interpolation
+
+import asyncio
 import os
 import sys
-from typing import Dict, Any, List
-import asyncio
+
 from contextlib import asynccontextmanager
+from typing import Any
 
 import click
 import uvicorn
 
-from agent import AirbnbAgent
-from agent_executor import AirbnbAgentExecutor
-from dotenv import load_dotenv
-
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
+from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import (
     AgentCapabilities,
     AgentCard,
     AgentSkill,
 )
-from a2a.server.tasks import InMemoryTaskStore
+from agents.airbnb_planner_multiagent.airbnb_agent.agent_executor import (
+    AirbnbAgentExecutor,
+)
+from agents.airbnb_planner_multiagent.airbnb_agent.airbnb_agent import (
+    AirbnbAgent,
+)
+from dotenv import load_dotenv
 from langchain_mcp_adapters.client import MultiServerMCPClient
+
 
 load_dotenv(override=True)
 
@@ -31,11 +39,15 @@ SERVER_CONFIGS = {
     },
 }
 
-app_context: Dict[str, Any] = {}
+app_context: dict[str, Any] = {}
 
+
+DEFAULT_HOST = "localhost"
+DEFAULT_PORT = 10002
+DEFAULT_LOG_LEVEL = "info"
 
 @asynccontextmanager
-async def app_lifespan(context: Dict[str, Any]):
+async def app_lifespan(context: dict[str, Any]):
     """Manages the lifecycle of shared resources like the MCP client and tools."""
     print("Lifespan: Initializing MCP client and tools...")
 
@@ -93,16 +105,7 @@ async def app_lifespan(context: Dict[str, Any]):
         print("Lifespan: Clearing application context.")
         context.clear()
 
-
-@click.command()
-@click.option(
-    "--host", "host", default="localhost", help="Hostname to bind the server to."
-)
-@click.option(
-    "--port", "port", default=10002, type=int, help="Port to bind the server to."
-)
-@click.option("--log-level", "log_level", default="info", help="Uvicorn log level.")
-def cli_main(host: str, port: int, log_level: str):
+def main(host: str = DEFAULT_HOST, port: int = DEFAULT_PORT, log_level: str = DEFAULT_LOG_LEVEL):
     """Command Line Interface to start the Airbnb Agent server."""
     # Verify an API key is set.
     # Not required if using Vertex AI APIs.
@@ -171,10 +174,10 @@ def cli_main(host: str, port: int, log_level: str):
                 file=sys.stderr,
             )
         else:
-            print(f"RuntimeError in cli_main: {e}", file=sys.stderr)
+            print(f"RuntimeError in main: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"An unexpected error occurred in cli_main: {e}", file=sys.stderr)
+        print(f"An unexpected error occurred in main: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -202,5 +205,16 @@ def get_agent_card(host: str, port: int):
     )
 
 
+@click.command()
+@click.option(
+    "--host", "host", default=DEFAULT_HOST, help="Hostname to bind the server to."
+)
+@click.option(
+    "--port", "port", default=DEFAULT_PORT, type=int, help="Port to bind the server to."
+)
+@click.option("--log-level", "log_level", default=DEFAULT_LOG_LEVEL, help="Uvicorn log level.")
+def cli(host: str, port: int, log_level: str):
+    main(host, port, log_level)
+
 if __name__ == "__main__":
-    cli_main()
+    main()

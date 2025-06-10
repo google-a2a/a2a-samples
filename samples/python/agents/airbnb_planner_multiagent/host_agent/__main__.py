@@ -14,18 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import gradio as gr
-from typing import List, AsyncIterator
-from adk_agent.agent import (
-    root_agent as routing_agent,
-)  
-from google.adk.sessions import InMemorySessionService
-from google.adk.runners import Runner
-from google.adk.events import Event
-from google.genai import types
-from pprint import pformat
 import asyncio
 import traceback  # Import the traceback module
+
+from collections.abc import AsyncIterator
+from pprint import pformat
+
+import gradio as gr
+
+from agents.airbnb_planner_multiagent.host_agent.routing_agent import (
+    root_agent as routing_agent,
+)
+from google.adk.events import Event
+from google.adk.runners import Runner
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
+
 
 APP_NAME = "routing_app"
 USER_ID = "default_user"
@@ -41,17 +45,17 @@ ROUTING_AGENT_RUNNER = Runner(
 
 async def get_response_from_agent(
     message: str,
-    history: List[gr.ChatMessage],
+    history: list[gr.ChatMessage],
 ) -> AsyncIterator[gr.ChatMessage]:
     """Get response from host agent."""
     try:
-        events_iterator: AsyncIterator[Event] = ROUTING_AGENT_RUNNER.run_async(
+        event_iterator: AsyncIterator[Event] = ROUTING_AGENT_RUNNER.run_async(
             user_id=USER_ID,
             session_id=SESSION_ID,
             new_message=types.Content(role="user", parts=[types.Part(text=message)]),
         )
 
-        async for event in events_iterator:
+        async for event in event_iterator:
             if event.content and event.content.parts:
                 for part in event.content.parts:
                     if part.function_call:

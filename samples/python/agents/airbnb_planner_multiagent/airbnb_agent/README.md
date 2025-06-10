@@ -2,10 +2,7 @@
 
 ## Getting started
 
-1. Create an environment file with your API key:
-   ```bash
-   echo "GOOGLE_API_KEY=your_api_key_here" > .env
-   ```
+1. Create a .env file using the `.env.example` file as a template.
 
 2. Start the server
     ```bash
