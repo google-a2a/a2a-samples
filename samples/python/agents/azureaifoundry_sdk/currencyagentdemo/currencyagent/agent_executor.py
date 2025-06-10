@@ -3,6 +3,7 @@ import logging
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events.event_queue import EventQueue
 from a2a.types import (
+    AgentCard,
     TaskArtifactUpdateEvent,
     TaskState,
     TaskStatus,
@@ -13,18 +14,18 @@ from a2a.utils import (
     new_task,
     new_text_artifact,
 )
-from agent import SemanticKernelTravelAgent
+from agent import CurrencyAgent
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class SemanticKernelTravelAgentExecutor(AgentExecutor):
+class CurrencyAgentExecutor(AgentExecutor):
     """ "SemanticKernelTravelAgent Executor"""
 
     def __init__(self):
-        self.agent = SemanticKernelTravelAgent()
+        self.agent = CurrencyAgent()
 
     async def execute(
         self,
@@ -35,7 +36,7 @@ class SemanticKernelTravelAgentExecutor(AgentExecutor):
         task = context.current_task
         if not task:
             task = new_task(context.message)
-            await event_queue.enqueue_event(task)
+            event_queue.enqueue_event(task)
 
         async for partial in self.agent.stream(query, task.contextId):
             require_input = partial['require_user_input']
@@ -43,7 +44,7 @@ class SemanticKernelTravelAgentExecutor(AgentExecutor):
             text_content = partial['content']
 
             if require_input:
-                await event_queue.enqueue_event(
+                event_queue.enqueue_event(
                     TaskStatusUpdateEvent(
                         status=TaskStatus(
                             state=TaskState.input_required,
@@ -59,7 +60,7 @@ class SemanticKernelTravelAgentExecutor(AgentExecutor):
                     )
                 )
             elif is_done:
-                await event_queue.enqueue_event(
+                event_queue.enqueue_event(
                     TaskArtifactUpdateEvent(
                         append=False,
                         contextId=task.contextId,
@@ -72,7 +73,7 @@ class SemanticKernelTravelAgentExecutor(AgentExecutor):
                         ),
                     )
                 )
-                await event_queue.enqueue_event(
+                event_queue.enqueue_event(
                     TaskStatusUpdateEvent(
                         status=TaskStatus(state=TaskState.completed),
                         final=True,
@@ -81,7 +82,7 @@ class SemanticKernelTravelAgentExecutor(AgentExecutor):
                     )
                 )
             else:
-                await event_queue.enqueue_event(
+                event_queue.enqueue_event(
                     TaskStatusUpdateEvent(
                         status=TaskStatus(
                             state=TaskState.working,
@@ -101,3 +102,8 @@ class SemanticKernelTravelAgentExecutor(AgentExecutor):
         self, context: RequestContext, event_queue: EventQueue
     ) -> None:
         raise Exception('cancel not supported')
+    
+
+# def create_foundry_agent_executor(card: AgentCard) -> CurrencyAgentExecutor:
+#     """Factory function to create a Foundry agent executor."""
+#     return CurrencyAgentExecutor(card)

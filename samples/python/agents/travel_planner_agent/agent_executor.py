@@ -35,7 +35,7 @@ class TravelPlannerAgentExecutor(AgentExecutor):
                     text=event['content'],
                 ),
             )
-            event_queue.enqueue_event(message)
+            await event_queue.enqueue_event(message)
 
     @override
     async def cancel(

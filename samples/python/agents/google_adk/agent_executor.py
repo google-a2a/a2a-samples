@@ -39,7 +39,7 @@ class ReimbursementAgentExecutor(AgentExecutor):
         # not have current task, create a new one and use it.
         if not task:
             task = new_task(context.message)
-            event_queue.enqueue_event(task)
+            await event_queue.enqueue_event(task)
         updater = TaskUpdater(event_queue, task.id, task.contextId)
         # invoke the underlying agent, using streaming results. The streams
         # now are update events.
