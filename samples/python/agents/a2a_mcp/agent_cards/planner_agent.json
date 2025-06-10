@@ -12,9 +12,9 @@
         ]
     },
     "capabilities": {
-        "streaming": "True",
-        "pushNotifications": "True",
-        "stateTransitionHistory": "False"
+        "streaming": true,
+        "pushNotifications": true,
+        "stateTransitionHistory": false
     },
     "defaultInputModes": [
         "text",

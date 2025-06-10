@@ -6,9 +6,9 @@
     "version": "1.0.0",
     "documentationUrl": null,
     "capabilities": {
-        "streaming": "True",
-        "pushNotifications": "True",
-        "stateTransitionHistory": "False"
+        "streaming": true,
+        "pushNotifications": true,
+        "stateTransitionHistory": false
     },
     "authentication": {
         "credentials": null,
