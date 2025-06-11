@@ -90,11 +90,11 @@ class LlamaIndexAgentExecutor(AgentExecutor):
 
             # Emit an initial task object
             updater = TaskUpdater(event_queue, task_id, context_id)
-            updater.submit()
+            await updater.submit()
             async for event in handler.stream_events():
                 if isinstance(event, LogEvent):
                     # Send log event as intermediate message
-                    updater.update_status(
+                    await updater.update_status(
                         TaskState.working,
                         new_agent_text_message(event.msg, context_id, task_id),
                     )
@@ -115,14 +115,14 @@ class LlamaIndexAgentExecutor(AgentExecutor):
                 # save the context state to resume the current session
                 self.ctx_states[context_id] = handler.ctx.to_dict()
 
-                updater.add_artifact(
+                await updater.add_artifact(
                     [Part(root=TextPart(text=content))],
                     name='llama_summary',
                     metadata=metadata,
                 )
-                updater.complete()
+                await updater.complete()
             else:
-                updater.failed(f'Unexpected completion {final_response}')
+                await updater.failed(f'Unexpected completion {final_response}')
 
         except Exception as e:
             logger.error(f'An error occurred while streaming the response: {e}')

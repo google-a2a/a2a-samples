@@ -47,7 +47,7 @@ class ReimbursementAgentExecutor(AgentExecutor):
             is_task_complete = item['is_task_complete']
             artifacts = None
             if not is_task_complete:
-                updater.update_status(
+                await updater.update_status(
                     TaskState.working,
                     new_agent_text_message(
                         item['updates'], task.contextId, task.id
@@ -62,7 +62,7 @@ class ReimbursementAgentExecutor(AgentExecutor):
                     and 'result' in item['content']['response']
                 ):
                     data = json.loads(item['content']['response']['result'])
-                    updater.update_status(
+                    await updater.update_status(
                         TaskState.input_required,
                         new_agent_parts_message(
                             [Part(root=DataPart(data=data))],
@@ -73,7 +73,7 @@ class ReimbursementAgentExecutor(AgentExecutor):
                     )
                     continue
                 else:
-                    updater.update_status(
+                    await updater.update_status(
                         TaskState.failed,
                         new_agent_text_message(
                             'Reaching an unexpected state',
@@ -85,10 +85,10 @@ class ReimbursementAgentExecutor(AgentExecutor):
                     break
             else:
                 # Emit the appropriate events
-                updater.add_artifact(
+                await updater.add_artifact(
                     [Part(root=TextPart(text=item['content']))], name='form'
                 )
-                updater.complete()
+                await updater.complete()
                 break
 
     async def cancel(

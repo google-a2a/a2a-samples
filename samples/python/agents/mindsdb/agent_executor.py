@@ -37,7 +37,7 @@ class MindsDBAgentExecutor(AgentExecutor):
             async for item in self.agent.stream(query, task.contextId):
                 is_task_complete = item['is_task_complete']
                 if not is_task_complete:
-                    updater.update_status(
+                    await updater.update_status(
                         TaskState.working,
                         new_agent_text_message(
                             item['metadata'],
@@ -47,8 +47,8 @@ class MindsDBAgentExecutor(AgentExecutor):
                     )
                 else:
                     parts = item['parts']
-                    updater.add_artifacts(parts)
-                    updater.complete()
+                    await updater.add_artifact(parts)
+                    await updater.complete()
                     break
 
         except Exception as e:
