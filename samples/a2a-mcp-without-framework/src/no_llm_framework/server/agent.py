@@ -1,16 +1,18 @@
 import asyncio
 import json
 import re
+
 from collections.abc import AsyncGenerator, Callable, Generator
 from pathlib import Path
 from typing import Literal
 
 import google.generativeai as genai
+
 from jinja2 import Template
 from mcp.types import CallToolResult
 
-from no_llm_framework.server.constant import GOOGLE_API_KEY
 from no_llm_framework.server.mcp import call_mcp_tool, get_mcp_tool_prompt
+
 
 dir_path = Path(__file__).parent
 
@@ -33,10 +35,13 @@ def stream_llm(prompt: str) -> Generator[str, None]:
     Returns:
         Generator[str, None, None]: A generator of the LLM response.
     """
-    genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    for chunk in model.generate_content(prompt, stream=True):
-        yield chunk.text
+    model = getattr(genai, 'GenerativeModel', None)
+    if model is not None:
+        model = model('gemini-1.5-flash')
+        for chunk in model.generate_content(prompt, stream=True):
+            yield chunk.text
+    else:
+        raise ImportError('google.generativeai does not have GenerativeModel. Please update the package.')
 
 
 class Agent:
@@ -60,12 +65,10 @@ class Agent:
 
         Returns:
             Generator[str, None]: A generator yielding the LLM's response.
-        """   # noqa: E501
+        """
         return stream_llm(prompt)
 
-    async def decide(
-        self, question: str, called_tools: list[dict] | None = None
-    ) -> Generator[str, None]:
+    async def decide(self, question: str, called_tools: list[dict] | None = None) -> Generator[str, None]:
         """Decide which tool to use to answer the question.
 
         Args:
@@ -75,12 +78,7 @@ class Agent:
         if self.mcp_url is None:
             return self.call_llm(question)
         tool_prompt = await get_mcp_tool_prompt(self.mcp_url)
-        if called_tools:
-            called_tools_prompt = called_tools_history_template.render(
-                called_tools=called_tools
-            )
-        else:
-            called_tools_prompt = ''
+        called_tools_prompt = called_tools_history_template.render(called_tools=called_tools) if called_tools else ''
 
         prompt = decide_template.render(
             question=question,
@@ -107,14 +105,11 @@ class Agent:
         Args:
             tools (list[dict]): The tools to call.
         """
-        return await asyncio.gather(
-            *[
-                call_mcp_tool(self.mcp_url, tool['name'], tool['arguments'])
-                for tool in tools
-            ]
-        )
+        if self.mcp_url is None:
+            raise ValueError('mcp_url must not be None when calling tools.')
+        return await asyncio.gather(*[call_mcp_tool(self.mcp_url, tool['name'], tool['arguments']) for tool in tools])
 
-    async def stream(self, question: str) -> AsyncGenerator[str]:
+    async def stream(self, question: str) -> AsyncGenerator[dict[str, bool | str], None]:
         """Stream the process of answering a question, possibly involving tool calls.
 
         Args:
@@ -122,8 +117,8 @@ class Agent:
 
         Yields:
             dict: Streaming output, including intermediate steps and final result.
-        """  # noqa: E501
-        called_tools = []
+        """
+        called_tools: list[dict] = []
         for i in range(10):
             yield {
                 'is_task_complete': False,
@@ -137,7 +132,7 @@ class Agent:
                 yield {
                     'is_task_complete': False,
                     'require_user_input': False,
-                    'content': chunk,
+                    'content': str(chunk),
                 }
             tools = self.extract_tools(response)
             if not tools:
@@ -149,17 +144,16 @@ class Agent:
                     'tool': tool['name'],
                     'arguments': tool['arguments'],
                     'isError': result.isError,
-                    'result': result.content[0].text,
+                    'result': getattr(result.content[0], 'text', str(result.content[0])),
                 }
                 for tool, result in zip(tools, results, strict=True)
             ]
-            called_tools_history = called_tools_history_template.render(
-                called_tools=called_tools, question=question
-            )
+            called_tools_history = called_tools_history_template.render(called_tools=called_tools, question=question)
+            content_str = called_tools_history if isinstance(called_tools_history, str) else str(called_tools_history)
             yield {
                 'is_task_complete': False,
                 'require_user_input': False,
-                'content': called_tools_history,
+                'content': content_str,
             }
 
         yield {

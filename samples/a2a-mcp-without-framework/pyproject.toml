@@ -18,6 +18,11 @@ dependencies = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[dependency-groups]
+dev = [
+    "types-colorama>=0.4.15.20240311",
+]
+
 [project.scripts]
 a2a-server = "no_llm_framework.server.__main__:main"
 a2a-client = "no_llm_framework.client.__main__:main"

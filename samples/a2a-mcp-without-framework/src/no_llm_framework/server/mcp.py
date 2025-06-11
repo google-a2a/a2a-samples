@@ -1,10 +1,12 @@
 import asyncio
+
 from pathlib import Path
 
 from jinja2 import Template
 from mcp.client.session import ClientSession
 from mcp.client.sse import sse_client
 from mcp.types import CallToolResult, TextContent
+
 
 dir_path = Path(__file__).parent
 
@@ -31,9 +33,7 @@ async def get_mcp_tool_prompt(url: str) -> str:
         return template.render(tools=resources.tools)
 
 
-async def call_mcp_tool(
-    url: str, tool_name: str, arguments: dict | None = None
-) -> CallToolResult:
+async def call_mcp_tool(url: str, tool_name: str, arguments: dict | None = None) -> CallToolResult:
     """Call an MCP tool with the given URL and tool name.
 
     Args:
@@ -43,7 +43,7 @@ async def call_mcp_tool(
 
     Returns:
         CallToolResult: The result of the tool call.
-    """  # noqa: E501
+    """
     async with (
         sse_client(
             url=url,
@@ -57,9 +57,7 @@ async def call_mcp_tool(
 
 if __name__ == '__main__':
     print(asyncio.run(get_mcp_tool_prompt('https://gitmcp.io/google/A2A')))
-    result = asyncio.run(
-        call_mcp_tool('https://gitmcp.io/google/A2A', 'fetch_A2A_documentation')
-    )
+    result = asyncio.run(call_mcp_tool('https://gitmcp.io/google/A2A', 'fetch_A2A_documentation'))
     for content in result.content:
         if isinstance(content, TextContent):
             print(content.text)

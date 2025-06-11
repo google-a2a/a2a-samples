@@ -1,3 +1,5 @@
+from typing import override
+
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.types import (
@@ -7,7 +9,6 @@ from a2a.types import (
     TaskStatusUpdateEvent,
 )
 from a2a.utils import new_agent_text_message, new_task, new_text_artifact
-from typing import override
 
 from src.no_llm_framework.server.agent import Agent
 
@@ -39,6 +40,7 @@ class HelloWorldAgentExecutor(AgentExecutor):
             await event_queue.enqueue_event(task)
 
         async for event in self.agent.stream(query):
+            content = str(event['content']) if not isinstance(event['content'], str) else event['content']
             if event['is_task_complete']:
                 await event_queue.enqueue_event(
                     TaskArtifactUpdateEvent(
@@ -49,7 +51,7 @@ class HelloWorldAgentExecutor(AgentExecutor):
                         artifact=new_text_artifact(
                             name='current_result',
                             description='Result of request to agent.',
-                            text=event['content'],
+                            text=content,
                         ),
                     )
                 )
@@ -67,7 +69,7 @@ class HelloWorldAgentExecutor(AgentExecutor):
                         status=TaskStatus(
                             state=TaskState.input_required,
                             message=new_agent_text_message(
-                                event['content'],
+                                content,
                                 task.contextId,
                                 task.id,
                             ),
@@ -80,11 +82,10 @@ class HelloWorldAgentExecutor(AgentExecutor):
             else:
                 await event_queue.enqueue_event(
                     TaskStatusUpdateEvent(
-                        append=True,
                         status=TaskStatus(
                             state=TaskState.working,
                             message=new_agent_text_message(
-                                event['content'],
+                                content,
                                 task.contextId,
                                 task.id,
                             ),
@@ -96,7 +97,5 @@ class HelloWorldAgentExecutor(AgentExecutor):
                 )
 
     @override
-    async def cancel(
-        self, context: RequestContext, event_queue: EventQueue
-    ) -> None:
+    async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
         raise Exception('cancel not supported')
