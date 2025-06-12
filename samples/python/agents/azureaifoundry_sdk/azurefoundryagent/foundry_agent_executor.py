@@ -74,7 +74,7 @@ class FoundryAgentExecutor(AgentExecutor):
             thread_id = await self._get_or_create_thread(context_id)
             
             # Update status
-            task_updater.update_status(
+            await task_updater.update_status(
                 TaskState.working,
                 message=new_agent_text_message(
                     "Processing your request...", context_id=context_id
@@ -86,7 +86,7 @@ class FoundryAgentExecutor(AgentExecutor):
             
             # Send responses back
             for response in responses:
-                task_updater.update_status(
+                await task_updater.update_status(
                     TaskState.working,
                     message=new_agent_text_message(
                         response, context_id=context_id
@@ -95,7 +95,7 @@ class FoundryAgentExecutor(AgentExecutor):
             
             # Mark as complete
             final_message = responses[-1] if responses else "Task completed."
-            task_updater.complete(
+            await task_updater.complete(
                 message=new_agent_text_message(
                     final_message, context_id=context_id
                 )
@@ -103,7 +103,7 @@ class FoundryAgentExecutor(AgentExecutor):
             
         except Exception as e:
             logger.error(f"Error processing request: {e}", exc_info=True)
-            task_updater.failed(
+            await task_updater.failed(
                 message=new_agent_text_message(
                     f"Error: {str(e)}", context_id=context_id
                 )
@@ -141,10 +141,10 @@ class FoundryAgentExecutor(AgentExecutor):
         
         # Notify task submission
         if not context.current_task:
-            updater.submit()
+            await updater.submit()
         
         # Start working
-        updater.start_work()
+        await updater.start_work()
         
         # Process the request
         await self._process_request(
@@ -166,7 +166,7 @@ class FoundryAgentExecutor(AgentExecutor):
         # 3. Notify the task store
         
         updater = TaskUpdater(event_queue, context.task_id, context.context_id)
-        updater.fail(
+        await updater.failed(
             message=new_agent_text_message(
                 "Task cancelled by user", context_id=context.context_id
             )

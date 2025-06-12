@@ -52,7 +52,7 @@ class CurrencyAgentExecutor(AgentExecutor):
                 require_user_input = item['require_user_input']
 
                 if not is_task_complete and not require_user_input:
-                    updater.update_status(
+                    await updater.update_status(
                         TaskState.working,
                         new_agent_text_message(
                             item['content'],
@@ -61,7 +61,7 @@ class CurrencyAgentExecutor(AgentExecutor):
                         ),
                     )
                 elif require_user_input:
-                    updater.update_status(
+                    await updater.update_status(
                         TaskState.input_required,
                         new_agent_text_message(
                             item['content'],
@@ -72,11 +72,11 @@ class CurrencyAgentExecutor(AgentExecutor):
                     )
                     break
                 else:
-                    updater.add_artifact(
+                    await updater.add_artifact(
                         [Part(root=TextPart(text=item['content']))],
                         name='conversion_result',
                     )
-                    updater.complete()
+                    await updater.complete()
                     break
 
         except Exception as e:

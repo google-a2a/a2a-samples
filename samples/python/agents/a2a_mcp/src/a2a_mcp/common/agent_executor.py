@@ -71,14 +71,14 @@ class GenericAgentExecutor(AgentExecutor):
                 else:
                     part = TextPart(text=item['content'])
 
-                updater.add_artifact(
+                await updater.add_artifact(
                     [part],
                     name=f'{self.agent.agent_name}-result',
                 )
-                updater.complete()
+                await updater.complete()
                 break
             elif require_user_input:
-                updater.update_status(
+                await updater.update_status(
                     TaskState.input_required,
                     new_agent_text_message(
                         item['content'],
@@ -89,7 +89,7 @@ class GenericAgentExecutor(AgentExecutor):
                 )
                 break
             else:
-                updater.update_status(
+                await updater.update_status(
                     TaskState.working,
                     new_agent_text_message(
                         item['content'],
