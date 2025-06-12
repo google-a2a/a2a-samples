@@ -54,7 +54,7 @@ class HostAgent:
         # connections are established.
 
     async def retrieve_card(self, address: str):
-        card_resolver = A2ACardResolver(self.http_client, address)
+        card_resolver = A2ACardResolver(self.httpx_client, address)
         card = await card_resolver.get_agent_card()
         self.register_agent_card(card)
 
