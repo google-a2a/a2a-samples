@@ -3,7 +3,7 @@ name = "airbnb_planner_multiagent"
 version = "0.1.0"
 description = "Plan a trip using a multi-agent system communicating over A2A and using MCP"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
     "click>=8.2.0",
     "geopy>=2.4.1",
