@@ -2,9 +2,6 @@ package com.google.a2a.model;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-/**
- * TaskState represents the state of a task within the A2A protocol
- */
 public enum TaskState {
     SUBMITTED("submitted"),
     WORKING("working"),

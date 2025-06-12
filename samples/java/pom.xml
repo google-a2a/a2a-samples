@@ -17,25 +17,16 @@
 
     <modules>
         <module>model</module>
-        <module>client</module>
-        <module>server</module>
+        <module>client-core</module>
+        <module>client-example</module>
+        <module>server-core</module>
+        <module>server-starter</module>
+        <module>server-example-spring-ai</module>
+        <module>server-example-google-adk</module>
     </modules>
 
     <properties>
         <java.version>17</java.version>
-        <spring-ai.version>1.0.0</spring-ai.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
 </project>
