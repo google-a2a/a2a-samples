@@ -22,13 +22,7 @@ public record JSONRPCMessage(
     }
 
     public static class Builder {
-        private String jsonrpc = "2.0"; // default
         private Object id;
-
-        public Builder jsonrpc(String jsonrpc) {
-            this.jsonrpc = jsonrpc != null ? jsonrpc : "2.0";
-            return this;
-        }
 
         public Builder id(Object id) {
             this.id = id;
@@ -36,7 +30,7 @@ public record JSONRPCMessage(
         }
 
         public JSONRPCMessage build() {
-            return new JSONRPCMessage(jsonrpc, id);
+            return new JSONRPCMessage("2.0", id);
         }
     }
 }

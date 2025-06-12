@@ -36,15 +36,15 @@ public class A2AServerAutoConfiguration {
         if (messageHandlers.isEmpty()) {
             throw new IllegalStateException("No MessageHandler implementation found. Please implement MessageHandler interface.");
         }
-        
+
         if (messageHandlers.size() > 1) {
             throw new IllegalStateException("Multiple MessageHandler implementations found. Please provide only one MessageHandler implementation.");
         }
 
         MessageHandler messageHandler = messageHandlers.get(0);
         AgentCard agentCard = createAgentCard();
-        
-        return new A2AServer(agentCard, messageHandler, objectMapper);
+
+        return new A2AServer(agentCard, messageHandler, objectMapper, properties.getRequestTimeout());
     }
 
     /**
@@ -85,7 +85,7 @@ public class A2AServerAutoConfiguration {
         // Create security schemes if authentication is configured
         Map<String, SecurityScheme> securitySchemes = null;
         List<Map<String, List<String>>> security = null;
-        
+
         if (properties.getAuthenticationMethods() != null && !properties.getAuthenticationMethods().isEmpty()) {
             // Convert authentication methods to security schemes
             securitySchemes = properties.getAuthenticationMethods().stream()
@@ -93,7 +93,7 @@ public class A2AServerAutoConfiguration {
                     method -> method.toLowerCase(),
                     method -> createSecurityScheme(method.toLowerCase())
                 ));
-            
+
             // Create security requirements
             security = List.of(
                 properties.getAuthenticationMethods().stream()
@@ -188,4 +188,4 @@ public class A2AServerAutoConfiguration {
                     .build();
         }
     }
-} 
+}

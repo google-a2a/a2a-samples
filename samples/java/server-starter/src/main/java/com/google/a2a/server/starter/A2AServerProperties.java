@@ -85,6 +85,11 @@ public class A2AServerProperties {
      */
     private List<String> authenticationMethods = List.of();
 
+    /**
+     * Request timeout in milliseconds.
+     */
+    private long requestTimeout = 60 * 60 * 1000;
+
     // Getters and setters
     public String getAgentName() {
         return agentName;
@@ -206,6 +211,15 @@ public class A2AServerProperties {
         this.authenticationMethods = authenticationMethods;
     }
 
+    public long getRequestTimeout() {
+        return requestTimeout;
+    }
+
+    public A2AServerProperties setRequestTimeout(long requestTimeout) {
+        this.requestTimeout = requestTimeout;
+        return this;
+    }
+
     /**
      * Agent provider configuration
      */
@@ -298,4 +312,4 @@ public class A2AServerProperties {
             this.outputContentTypes = outputContentTypes;
         }
     }
-} 
+}

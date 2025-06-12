@@ -63,7 +63,7 @@ public class A2AController {
             return createErrorSseEmitter(request.id(), -32600, "Invalid JSON-RPC version");
         }
 
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        SseEmitter emitter = new SseEmitter(server.getRequestTimeout());
 
         // Process request asynchronously
         CompletableFuture.runAsync(() -> {
@@ -164,7 +164,7 @@ public class A2AController {
      * Create error SSE emitter
      */
     private SseEmitter createErrorSseEmitter(Object requestId, int code, String message) {
-        SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
+        SseEmitter emitter = new SseEmitter(server.getRequestTimeout());
         sendErrorSseEvent(emitter, requestId, code, message);
         return emitter;
     }

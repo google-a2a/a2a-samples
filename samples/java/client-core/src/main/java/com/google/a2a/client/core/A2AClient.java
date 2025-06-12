@@ -106,8 +106,10 @@ public class A2AClient {
                     HttpResponse.BodyHandlers.ofInputStream());
 
                 if (response.statusCode() != 200) {
-                    String errorBody = new String(response.body().readAllBytes());
-                    listener.onError(new A2AClientException("HTTP " + response.statusCode() + ": " + errorBody));
+                    try (InputStream inputStream = response.body()) {
+                        String errorBody = new String(inputStream.readAllBytes());
+                        listener.onError(new A2AClientException("HTTP " + response.statusCode() + ": " + errorBody));
+                    }
                     return;
                 }
 
@@ -276,8 +278,8 @@ public class A2AClient {
                     StringBuilder eventData = new StringBuilder();
 
                     while ((line = reader.readLine()) != null) {
-                        if (line.startsWith("data: ")) {
-                            eventData.append(line.substring(6));
+                        if (line.startsWith("data:")) {
+                            eventData.append(line.substring(5).trim());
                         } else if (line.isEmpty() && eventData.length() > 0) {
                             try {
                                 JsonNode eventNode = objectMapper.readTree(eventData.toString());
