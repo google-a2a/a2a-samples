@@ -94,7 +94,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "a2a-samples", editable = "." },
-    { name = "a2a-sdk", specifier = ">=0.2.6" },
+    { name = "a2a-sdk", specifier = ">=0.2.7" },
     { name = "google-adk", specifier = ">=1.0.0" },
     { name = "google-genai", specifier = ">=1.9.0" },
 ]
@@ -126,7 +126,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "a2a-sdk", specifier = ">=0.2.6" },
+    { name = "a2a-sdk", specifier = ">=0.2.7" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "httpx-sse", specifier = ">=0.4.0" },
     { name = "jwcrypto", specifier = ">=1.5.6" },
@@ -199,7 +199,7 @@ requires-dist = [
 
 [[package]]
 name = "a2a-sdk"
-version = "0.2.6"
+version = "0.2.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fastapi" },
@@ -215,9 +215,9 @@ dependencies = [
     { name = "sse-starlette" },
     { name = "starlette" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b4/5c/01c751ceb5e9288d6738d23384924637383d000054eb5a21bc6b5bbfe5e3/a2a_sdk-0.2.6.tar.gz", hash = "sha256:2625cedec823f0600980e0da8ddeec8181e5aafe095d73f430d694e16403b6f0", size = 132368, upload-time = "2025-06-09T16:53:01.086Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b5/97/ecfb9868c14ff719841f4acb8d83da90540742e49d55116c9e7e66f9274c/a2a_sdk-0.2.7.tar.gz", hash = "sha256:e99bb12bebfbe48ea22fa217b3c79e51a85c90572c7e5df6b2a4448d3b0df10e", size = 133027, upload-time = "2025-06-11T17:27:15.185Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ec/cf/a4eb4d6cd6d29e7dd9224730de8ea93735aee468070f5e81e19dc7c3fdf3/a2a_sdk-0.2.6-py3-none-any.whl", hash = "sha256:cfaadfde94c9e42cc2d610b7367cfc8cb6daf9a2afe400d5be8c832a7f64253e", size = 86558, upload-time = "2025-06-09T16:52:59.714Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/9d/29707438178912017735363a9a60da84afb4994fd14e5bbfd069a7da28af/a2a_sdk-0.2.7-py3-none-any.whl", hash = "sha256:e7d501b9486c2fec97450e01bee9ba26d187a5ff5d4281aa4a0ec3660ba22c25", size = 86580, upload-time = "2025-06-11T17:27:13.863Z" },
 ]
 
 [[package]]
@@ -257,7 +257,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "a2a-samples", editable = "." },
-    { name = "a2a-sdk", specifier = ">=0.2.6" },
+    { name = "a2a-sdk", specifier = ">=0.2.7" },
     { name = "asyncclick", specifier = ">=8.1.8" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "google-adk", specifier = ">=1.0.0" },
