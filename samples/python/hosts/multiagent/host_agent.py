@@ -46,6 +46,7 @@ class HostAgent:
         self.remote_agent_connections: dict[str, RemoteAgentConnections] = {}
         self.cards: dict[str, AgentCard] = {}
         task_group = asyncio.TaskGroup()
+        self.agents: str = ''
         for address in remote_agent_addresses:
             task_group.create_task(self.retrieve_card(address))
         # The task groups run in the background and complete.
