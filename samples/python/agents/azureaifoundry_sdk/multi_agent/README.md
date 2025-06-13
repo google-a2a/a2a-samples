@@ -13,15 +13,13 @@ graph TD
     A[User Request] --> B[Host Agent<br/>Azure AI Foundry]
     B --> C{Routing Logic}
     C --> D[Playwright Agent<br/>STDIO]
-    C --> E[Tool Agent<br/>A2A Protocol]
-    C --> F[MCP Azure Functions<br/>SSE]
+    C --> E[MCP Azure Functions<br/>SSE]
     
-    B -.-> G[Semantic Kernel]
-    B -.-> H[A2A Protocol]
+    B -.-> F[Semantic Kernel]
+    B -.-> G[A2A Protocol]
     
-    D --> I[Web Automation]
-    E --> J[General Tools]
-    F --> K[Serverless Functions]
+    D --> H[Web Automation]
+    F --> I[Serverless Functions]
     
     style B fill:#e1f5fe
     style C fill:#f3e5f5
