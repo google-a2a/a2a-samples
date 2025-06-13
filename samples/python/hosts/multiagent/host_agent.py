@@ -45,10 +45,14 @@ class HostAgent:
         self.httpx_client = http_client
         self.remote_agent_connections: dict[str, RemoteAgentConnections] = {}
         self.cards: dict[str, AgentCard] = {}
-        task_group = asyncio.TaskGroup()
         self.agents: str = ''
-        for address in remote_agent_addresses:
-            task_group.create_task(self.retrieve_card(address))
+        loop = asyncio.get_running_loop()
+        loop.create_task(self.init_remote_agent_addresses(remote_agent_addresses))
+
+    async def init_remote_agent_addresses(self, remote_agent_addresses: list[str]):
+        async with asyncio.TaskGroup() as task_group:
+            for address in remote_agent_addresses:
+                task_group.create_task(self.retrieve_card(address))
         # The task groups run in the background and complete.
         # Once completed the self.agents string is set and the remote
         # connections are established.
