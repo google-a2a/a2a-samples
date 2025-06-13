@@ -19,7 +19,6 @@ graph TD
     B -.-> G[A2A Protocol]
     
     D --> H[Web Automation]
-    F --> I[Serverless Functions]
     
     style B fill:#e1f5fe
     style C fill:#f3e5f5
