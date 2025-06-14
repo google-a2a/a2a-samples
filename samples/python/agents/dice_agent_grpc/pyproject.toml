@@ -16,7 +16,7 @@ dependencies = [
     "grpcio>=1.60",
     "grpcio-tools>=1.60",
     "grpcio_reflection>=1.7.0",
-    "a2a-sdk>=0.2.6",
+    "a2a-sdk>=0.2.7",
 ]
 
 [tool.hatch.metadata]
