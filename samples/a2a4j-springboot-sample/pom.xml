@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.google.a2a4j</groupId>
-    <artifactId>a2a4j-springboot-samples</artifactId>
+    <artifactId>a2a4j-springboot-sample</artifactId>
     <packaging>pom</packaging>
     <version>1.0</version>
 
