@@ -116,14 +116,14 @@ curl -X POST http://localhost:8089/a2a/server \
         "role": "user",
         "parts": [
           {
-            "type": "text",
             "kind": "text",
             "text": "Please help me analyze basic machine learning concepts"
           }
-        ]
+        ],
+        "messageId": "9229e770-767c-417b-a0b0-f0741243c589"
       }
     },
-    "id": "test-1"
+    "id": "1"
   }'
 ```
 
@@ -143,14 +143,14 @@ curl -X POST http://localhost:8089/a2a/server \
         "role": "user",
         "parts": [
           {
-            "type": "text",
             "kind": "text",
             "text": "Generate a simple Java class example"
           }
-        ]
+        ],
+        "messageId": "9229e770-767c-417b-a0b0-f0741243c589"
       }
     },
-    "id": "stream-1"
+    "id": "1"
   }'
 ```
 
