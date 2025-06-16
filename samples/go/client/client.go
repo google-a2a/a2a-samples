@@ -94,7 +94,7 @@ func (c *Client) CancelTask(params models.TaskIDParams) (*models.JSONRPCResponse
 }
 
 // SendTaskStreaming sends a task message and streams the response
-func (c *Client) SendTaskStreaming(params models.TaskSendParams, eventChan chan<- interface{}) error {
+func (c *Client) SendTaskStreaming(params models.TaskSendParams, eventChan chan<- any) error {
 	req := models.JSONRPCRequest{
 		JSONRPCMessage: models.JSONRPCMessage{
 			JSONRPC: "2.0",
@@ -139,9 +139,12 @@ func (c *Client) SendTaskStreaming(params models.TaskSendParams, eventChan chan<
 		if event.Error != nil {
 			return fmt.Errorf("A2A error: %s (code: %d)", event.Error.Message, event.Error.Code)
 		}
-
+		jsonres, err := json.Marshal(event.Result)
+		if err != nil {
+			return fmt.Errorf("failed to encode event result: %w", err)
+		}
 		select {
-		case eventChan <- event.Result:
+		case eventChan <- json.RawMessage(jsonres):
 		case <-httpReq.Context().Done():
 			return httpReq.Context().Err()
 		}
