@@ -147,7 +147,7 @@ curl -X POST http://localhost:8089/a2a/server \
             "text": "Generate a simple Java class example"
           }
         ],
-        "messageId": "9229e770-767c-417b-a0b0-f0741243c589"
+        "messageId": "9229e770-767c-417b-a0b0-f0741243c583"
       }
     },
     "id": "1"
