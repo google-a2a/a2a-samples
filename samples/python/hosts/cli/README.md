@@ -41,6 +41,8 @@ For example:
 
 uv run . --agent http://localhost:10000
 
+Note: You can run the calendar_agent sample and use it's URL to test OAuth functionality.
+
 ## Authentication
 The CLI supports interacting with agents that require authentication via bearer tokens (as is common with OAuth2 or OpenID Connect).
 
