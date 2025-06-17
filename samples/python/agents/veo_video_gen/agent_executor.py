@@ -47,7 +47,7 @@ class VideoGenerationAgentExecutor(AgentExecutor):
 
         if not task:
             task = new_task(context.message)
-            event_queue.enqueue_event(task)
+            await event_queue.enqueue_event(task)
         
         updater = TaskUpdater(event_queue, task.id, task.contextId)
         
@@ -68,7 +68,7 @@ class VideoGenerationAgentExecutor(AgentExecutor):
                              f"message_text='{updates_text}', "
                              f"intended_progress_float={progress_float*100 if progress_float is not None else 'N/A'} (note: progress arg not supported by update_status in this SDK version)")
                 try:
-                    updater.update_status(
+                    await updater.update_status(
                         TaskState.working,
                         message=agent_update_message
                     )
@@ -104,15 +104,15 @@ class VideoGenerationAgentExecutor(AgentExecutor):
                     )
                     
                     logger.info(f"Task {task.id} completed with file. Artifact: {artifact_name}, URI: {file_data['uri']}")
-                    updater.add_artifact([Part(root=video_file_part)])
-                    updater.complete(final_message_obj) # Pass message positionally, remove progress
+                    await updater.add_artifact([Part(root=video_file_part)])
+                    await updater.complete(final_message_obj) # Pass message positionally, remove progress
                 
                 else: # No file part, completion is text-based (e.g., error or informational)
                     is_error = item.get('is_error', False)
                     final_task_state = TaskState.failed if is_error else TaskState.completed
                     logger.info(f"Task {task.id} completed text-based. State: {final_task_state}, Message: {final_message_text}")
                     
-                    updater.update_status(
+                    await updater.update_status(
                         final_task_state,
                         final_message_obj,
                         final=True # Marks task as completed/failed in the updater

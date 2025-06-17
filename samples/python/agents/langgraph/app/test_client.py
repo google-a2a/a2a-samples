@@ -128,6 +128,46 @@ async def main() -> None:
         print(response.model_dump(mode='json', exclude_none=True))
         # --8<-- [end:send_message]
 
+        # --8<-- [start:Multiturn]
+        send_message_payload_multiturn: dict[str, Any] = {
+            'message': {
+                'role': 'user',
+                'parts': [
+                    {'kind': 'text', 'text': 'How much is the exchange rate for 1 USD?'}
+                ],
+                'messageId': uuid4().hex,
+            },
+        }
+        request = SendMessageRequest(
+            id=str(uuid4()), params=MessageSendParams(**send_message_payload_multiturn)
+        )
+
+        response = await client.send_message(request)
+        print(response.model_dump(mode='json', exclude_none=True))
+
+
+        task_id = response.root.result.id
+        contextId =response.root.result.contextId
+
+        second_send_message_payload_multiturn: dict[str, Any] = {
+            'message': {
+                'role': 'user',
+                'parts': [
+                    {'kind': 'text', 'text': 'CAD'}
+                ],
+                'messageId': uuid4().hex,
+                'taskId':task_id,
+                'contextId': contextId
+            },
+        }
+
+        second_request = SendMessageRequest(
+            id=str(uuid4()), params=MessageSendParams(**second_send_message_payload_multiturn)
+        )
+        second_response = await client.send_message(second_request)
+        print(second_response.model_dump(mode='json', exclude_none=True))
+        # --8<-- [end:Multiturn]
+
         # --8<-- [start:send_message_streaming]
 
         streaming_request = SendStreamingMessageRequest(

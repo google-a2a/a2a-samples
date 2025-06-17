@@ -100,7 +100,7 @@ class ADKAgentExecutor(AgentExecutor):
                 logger.debug(
                     'Yielding auth required response: %s', auth_details.uri
                 )
-                task_updater.update_status(
+                await task_updater.update_status(
                     TaskState.auth_required,
                     message=new_agent_text_message(
                         f'Authorization is required to continue. Visit {auth_details.uri}'
@@ -112,12 +112,12 @@ class ADKAgentExecutor(AgentExecutor):
             if event.is_final_response():
                 parts = convert_genai_parts_to_a2a(event.content.parts)
                 logger.debug('Yielding final response: %s', parts)
-                task_updater.add_artifact(parts)
-                task_updater.complete()
+                await task_updater.add_artifact(parts)
+                await task_updater.complete()
                 break
             if not event.get_function_calls():
                 logger.debug('Yielding update response')
-                task_updater.update_status(
+                await task_updater.update_status(
                     TaskState.working,
                     message=task_updater.new_agent_message(
                         convert_genai_parts_to_a2a(event.content.parts),
@@ -179,7 +179,7 @@ class ADKAgentExecutor(AgentExecutor):
             )
         except TimeoutError:
             logger.debug('Timed out waiting for auth, marking task as failed')
-            task_updater.update_status(
+            await task_updater.update_status(
                 TaskState.failed,
                 message=new_agent_text_message(
                     'Timed out waiting for authorization.',
@@ -188,7 +188,7 @@ class ADKAgentExecutor(AgentExecutor):
             )
             return
         logger.debug('Auth received, continuing')
-        task_updater.update_status(
+        await task_updater.update_status(
             TaskState.working,
             message=new_agent_text_message(
                 'Auth received, continuing...', context_id=context.context_id
@@ -228,8 +228,8 @@ class ADKAgentExecutor(AgentExecutor):
         updater = TaskUpdater(event_queue, context.task_id, context.context_id)
         # Immediately notify that the task is submitted.
         if not context.current_task:
-            updater.submit()
-        updater.start_work()
+            await updater.submit()
+        await updater.start_work()
         await self._process_request(
             types.UserContent(
                 parts=convert_a2a_parts_to_genai(context.message.parts),
@@ -249,7 +249,8 @@ class ADKAgentExecutor(AgentExecutor):
     async def _upsert_session(self, context: RequestContext) -> Session:
         user_id = 'anonymous'
         if context.call_context and context.call_context.user.is_authenticated:
-            user_id = context.call_context.user.user_name
+            user_id = context.call_context.user.username
+        
         session = await self.runner.session_service.get_session(
             app_name=self.runner.app_name,
             user_id=user_id,
@@ -301,7 +302,7 @@ class ADKAgentExecutor(AgentExecutor):
         )
         stored_credential = session.state.get(credential_key)
         if stored_credential:
-            self._credentials[context.call_context.user.user_name] = (
+            self._credentials[context.call_context.user.username] = (
                 StoredCredential(
                     key=credential_key, credential=stored_credential
                 )

@@ -167,14 +167,14 @@ class ADKAgentExecutor(AgentExecutor):
             if event.is_final_response():
                 response = convert_genai_parts_to_a2a(event.content.parts)
                 logger.debug('Yielding final response: %s', response)
-                task_updater.add_artifact(response)
-                task_updater.complete()
+                await task_updater.add_artifact(response)
+                await task_updater.complete()
                 break
             if calls := event.get_function_calls():
                 for call in calls:
                     # Provide an update on what we're doing.
                     if call.name == 'message_calendar_agent':
-                        task_updater.update_status(
+                        await task_updater.update_status(
                             TaskState.working,
                             message=task_updater.new_agent_message(
                                 [
@@ -188,7 +188,7 @@ class ADKAgentExecutor(AgentExecutor):
                         )
             elif not event.get_function_calls():
                 logger.debug('Yielding update response')
-                task_updater.update_status(
+                await task_updater.update_status(
                     TaskState.working,
                     message=task_updater.new_agent_message(
                         convert_genai_parts_to_a2a(event.content.parts)
@@ -230,8 +230,8 @@ class ADKAgentExecutor(AgentExecutor):
         updater = TaskUpdater(event_queue, context.task_id, context.context_id)
         # Immediately notify that the task is submitted.
         if not context.current_task:
-            updater.submit()
-        updater.start_work()
+            await updater.submit()
+        await updater.start_work()
         await self._process_request(
             types.UserContent(
                 parts=convert_a2a_parts_to_genai(context.message.parts),
