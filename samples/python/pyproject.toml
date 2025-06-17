@@ -27,6 +27,7 @@ members = [
     "agents/google_adk",
     "agents/marvin",
     "hosts/cli",
+    "hosts/cli_auth",
     "hosts/extended_agent_card_cli",
     "hosts/multiagent",
     "agents/airbnb_planner_multiagent",
@@ -41,6 +42,7 @@ members = [
 
 [tool.uv.sources]
 veo-video-sample-agent = { workspace = true }
+a2a-sample-client-cli = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
