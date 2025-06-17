@@ -1,6 +1,6 @@
 # A2A GitHub Agent
 
-An intelligent GitHub agent built with A2A (Agent-to-Agent) SDK that can query GitHub repositories, recent updates, commits, and project activity using natural language.
+An intelligent GitHub agent built with A2A (Agent2Agent) SDK that can query GitHub repositories, recent updates, commits, and project activity using natural language.
 
 ## 🔧 Key Modules Logic
 
@@ -42,8 +42,8 @@ All functions include error handling and support optional parameters for filteri
 
 ```bash
 # Clone the repository
-git clone https://github.com/sing1ee/a2a-py-github-agent.git
-cd a2a-py-github-agent
+git clone https://github.com/google-a2a/a2a-samples.git
+cd a2a-samples/samples/python/agents/github-agent
 
 # Create virtual environment
 uv venv
@@ -91,15 +91,12 @@ The server will start on `http://localhost:10007` by default.
 You can test the GitHub agent using the A2A Movie Agent client:
 
 ```bash
-# Clone the A2A Movie Agent client
-git clone https://github.com/sing1ee/a2a-js-movie-agent.git
-cd a2a-js-movie-agent
+# Clone the A2A samples if you haven't already
+git clone https://github.com/google-a2a/a2a-samples.git
 
-# Install dependencies
-bun install
-
-# Connect to your GitHub agent
-bun cli http://localhost:10007
+cd a2a-samples/samples/python/hosts/cli/
+# run cli
+uv run . http://localhost:10007
 ```
 
 This will start an interactive CLI that connects to your GitHub agent server.
@@ -148,4 +145,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 🔗 Related Projects
 
 - [A2A SDK](https://github.com/google-a2a/a2a-python) - The underlying A2A protocol implementation
-- [A2A Movie Agent](https://github.com/sing1ee/a2a-js-movie-agent) - A movie information agent built with A2A protocol

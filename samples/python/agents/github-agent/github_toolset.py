@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from github import Github, Auth
 from pydantic import BaseModel
@@ -20,7 +20,7 @@ class GitHubRepository(BaseModel):
     description: Optional[str] = None
     url: str
     updated_at: str
-    pushed_at: str
+    pushed_at: Optional[str] = None
     language: Optional[str] = None
     stars: int
     forks: int
@@ -33,6 +33,24 @@ class GitHubCommit(BaseModel):
     author: str
     date: str
     url: str
+
+
+class GitHubResponse(BaseModel):
+    """Base response model for GitHub API operations"""
+    status: str
+    message: str
+    count: Optional[int] = None
+    error_message: Optional[str] = None
+
+
+class RepositoryResponse(GitHubResponse):
+    """Response model for repository operations"""
+    data: Optional[List[GitHubRepository]] = None
+
+
+class CommitResponse(GitHubResponse):
+    """Response model for commit operations"""
+    data: Optional[List[GitHubCommit]] = None
 
 
 class GitHubToolset:
@@ -54,7 +72,7 @@ class GitHubToolset:
                 self._github_client = Github()
         return self._github_client
     
-    def get_user_repositories(self, username: Optional[str] = None, days: Optional[int] = None, limit: Optional[int] = None) -> Dict[str, Any]:
+    def get_user_repositories(self, username: Optional[str] = None, days: Optional[int] = None, limit: Optional[int] = None) -> RepositoryResponse:
         """Get user's repositories with recent updates
         Args:
             username: GitHub username (optional, defaults to authenticated user)
@@ -62,7 +80,7 @@ class GitHubToolset:
             limit: Maximum number of repositories to return (default: 10)
             
         Returns:
-            dict: Contains status ('success' or 'error') and repository list or error message.
+            RepositoryResponse: Contains status, repository list, and metadata
         """
         # Set default values
         if days is None:
@@ -80,10 +98,11 @@ class GitHubToolset:
                     user = github.get_user()
                 except Exception:
                     # If no token, we can't get authenticated user, so require username
-                    return {
-                        'status': 'error',
-                        'error_message': 'Username is required when not using authentication token'
-                    }
+                    return RepositoryResponse(
+                        status='error',
+                        message='Username is required when not using authentication token',
+                        error_message='Username is required when not using authentication token'
+                    )
             
             repos = []
             cutoff_date = datetime.now() - timedelta(days=days)
@@ -93,31 +112,32 @@ class GitHubToolset:
                     break
                     
                 if repo.updated_at >= cutoff_date:
-                    repos.append({
-                        'name': repo.name,
-                        'full_name': repo.full_name,
-                        'description': repo.description,
-                        'url': repo.html_url,
-                        'updated_at': repo.updated_at.isoformat(),
-                        'pushed_at': repo.pushed_at.isoformat() if repo.pushed_at else None,
-                        'language': repo.language,
-                        'stars': repo.stargazers_count,
-                        'forks': repo.forks_count
-                    })
+                    repos.append(GitHubRepository(
+                        name=repo.name,
+                        full_name=repo.full_name,
+                        description=repo.description,
+                        url=repo.html_url,
+                        updated_at=repo.updated_at.isoformat(),
+                        pushed_at=repo.pushed_at.isoformat() if repo.pushed_at else None,
+                        language=repo.language,
+                        stars=repo.stargazers_count,
+                        forks=repo.forks_count
+                    ))
             
-            return {
-                'status': 'success',
-                'data': repos,
-                'count': len(repos),
-                'message': f'Successfully retrieved {len(repos)} repositories updated in the last {days} days'
-            }
+            return RepositoryResponse(
+                status='success',
+                data=repos,
+                count=len(repos),
+                message=f'Successfully retrieved {len(repos)} repositories updated in the last {days} days'
+            )
         except Exception as e:
-            return {
-                'status': 'error',
-                'error_message': f'Failed to get repositories: {str(e)}'
-            }
+            return RepositoryResponse(
+                status='error',
+                message=f'Failed to get repositories: {str(e)}',
+                error_message=f'Failed to get repositories: {str(e)}'
+            )
     
-    def get_recent_commits(self, repo_name: str, days: Optional[int] = None, limit: Optional[int] = None) -> Dict[str, Any]:
+    def get_recent_commits(self, repo_name: str, days: Optional[int] = None, limit: Optional[int] = None) -> CommitResponse:
         """Get recent commits for a repository
         
         Args:
@@ -126,7 +146,7 @@ class GitHubToolset:
             limit: Maximum number of commits to return (default: 10)
             
         Returns:
-            dict: Contains status ('success' or 'error') and commit list or error message.
+            CommitResponse: Contains status, commit list, and metadata
         """
         # Set default values
         if days is None:
@@ -145,27 +165,28 @@ class GitHubToolset:
                 if len(commits) >= limit:
                     break
                     
-                commits.append({
-                    'sha': commit.sha[:8],
-                    'message': commit.commit.message.split('\n')[0],  # Only take the first line
-                    'author': commit.commit.author.name,
-                    'date': commit.commit.author.date.isoformat(),
-                    'url': commit.html_url
-                })
+                commits.append(GitHubCommit(
+                    sha=commit.sha[:8],
+                    message=commit.commit.message.split('\n')[0],  # Only take the first line
+                    author=commit.commit.author.name,
+                    date=commit.commit.author.date.isoformat(),
+                    url=commit.html_url
+                ))
             
-            return {
-                'status': 'success',
-                'data': commits,
-                'count': len(commits),
-                'message': f'Successfully retrieved {len(commits)} commits for repository {repo_name} in the last {days} days'
-            }
+            return CommitResponse(
+                status='success',
+                data=commits,
+                count=len(commits),
+                message=f'Successfully retrieved {len(commits)} commits for repository {repo_name} in the last {days} days'
+            )
         except Exception as e:
-            return {
-                'status': 'error',
-                'error_message': f'Failed to get commits: {str(e)}'
-            }
+            return CommitResponse(
+                status='error',
+                message=f'Failed to get commits: {str(e)}',
+                error_message=f'Failed to get commits: {str(e)}'
+            )
     
-    def search_repositories(self, query: str, sort: Optional[str] = None, limit: Optional[int] = None) -> Dict[str, Any]:
+    def search_repositories(self, query: str, sort: Optional[str] = None, limit: Optional[int] = None) -> RepositoryResponse:
         """Search for repositories with recent activity
         
         Args:
@@ -174,7 +195,7 @@ class GitHubToolset:
             limit: Maximum number of repositories to return (default: 10)
             
         Returns:
-            dict: Contains status ('success' or 'error') and search results or error message.
+            RepositoryResponse: Contains status, search results, and metadata
         """
         # Set default values
         if sort is None:
@@ -192,29 +213,30 @@ class GitHubToolset:
             results = github.search_repositories(query=search_query, sort=sort, order='desc')
             
             for repo in results[:limit]:
-                repos.append({
-                    'name': repo.name,
-                    'full_name': repo.full_name,
-                    'description': repo.description,
-                    'url': repo.html_url,
-                    'updated_at': repo.updated_at.isoformat(),
-                    'pushed_at': repo.pushed_at.isoformat() if repo.pushed_at else None,
-                    'language': repo.language,
-                    'stars': repo.stargazers_count,
-                    'forks': repo.forks_count
-                })
+                repos.append(GitHubRepository(
+                    name=repo.name,
+                    full_name=repo.full_name,
+                    description=repo.description,
+                    url=repo.html_url,
+                    updated_at=repo.updated_at.isoformat(),
+                    pushed_at=repo.pushed_at.isoformat() if repo.pushed_at else None,
+                    language=repo.language,
+                    stars=repo.stargazers_count,
+                    forks=repo.forks_count
+                ))
             
-            return {
-                'status': 'success',
-                'data': repos,
-                'count': len(repos),
-                'message': f'Successfully searched for {len(repos)} repositories matching "{query}"'
-            }
+            return RepositoryResponse(
+                status='success',
+                data=repos,
+                count=len(repos),
+                message=f'Successfully searched for {len(repos)} repositories matching "{query}"'
+            )
         except Exception as e:
-            return {
-                'status': 'error',
-                'error_message': f'Failed to search repositories: {str(e)}'
-            }
+            return RepositoryResponse(
+                status='error',
+                message=f'Failed to search repositories: {str(e)}',
+                error_message=f'Failed to search repositories: {str(e)}'
+            )
     
     def get_tools(self) -> Dict[str, Any]:
         """Return dictionary of available tools for OpenAI function calling"""

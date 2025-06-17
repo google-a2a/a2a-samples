@@ -59,10 +59,12 @@ def main(host: str, port: int):
 
     # Create OpenAI agent
     agent_data = create_agent()
+
     agent_executor = OpenAIAgentExecutor(
         card=agent_card,
         tools=agent_data['tools'],
-        api_key=os.getenv('OPENROUTER_API_KEY')
+        api_key=os.getenv('OPENROUTER_API_KEY'),
+        system_prompt=agent_data['system_prompt']
     )
 
     request_handler = DefaultRequestHandler(

@@ -24,7 +24,7 @@ logger.setLevel(logging.DEBUG)
 class OpenAIAgentExecutor(AgentExecutor):
     """An AgentExecutor that runs an OpenAI-based Agent."""
 
-    def __init__(self, card: AgentCard, tools: Dict[str, Any], api_key: str):
+    def __init__(self, card: AgentCard, tools: Dict[str, Any], api_key: str, system_prompt: str):
         self._card = card
         self.tools = tools
         self.client = AsyncOpenAI(
@@ -36,24 +36,7 @@ class OpenAIAgentExecutor(AgentExecutor):
             }
         )
         self.model = "anthropic/claude-3.5-sonnet"
-        self.system_prompt = """You are a GitHub agent that can help users query information about GitHub repositories and recent project updates.
-
-Users will request information about:
-- Recent updates to their repositories
-- Recent commits in specific repositories  
-- Search for repositories with recent activity
-- General GitHub project information
-
-Use the provided tools for interacting with the GitHub API.
-
-When displaying repository information, include relevant details like:
-- Repository name and description
-- Last updated time
-- Programming language
-- Stars and forks count
-- Recent commit information when available
-
-Always provide helpful and accurate information based on the GitHub API results."""
+        self.system_prompt = system_prompt
 
     async def _process_request(
         self,
@@ -125,11 +108,22 @@ Always provide helpful and accurate information based on the GitHub API results.
                         else:
                             result = {"error": f"Function {function_name} not found"}
                         
+                        # Serialize result properly - handle Pydantic models
+                        if hasattr(result, 'model_dump'):
+                            # It's a Pydantic model, use model_dump() to convert to dict
+                            result_json = json.dumps(result.model_dump())
+                        elif isinstance(result, dict):
+                            # It's a regular dict
+                            result_json = json.dumps(result)
+                        else:
+                            # Convert to string as fallback
+                            result_json = str(result)
+                        
                         # Add tool result to messages
                         messages.append({
                             "role": "tool",
                             "tool_call_id": tool_call.id,
-                            "content": json.dumps(result)
+                            "content": result_json
                         })
                     
                     # Send update to show we're processing
