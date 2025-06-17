@@ -8,7 +8,7 @@ import {
   A2AExpressApp,
   AgentExecutor,
   RequestContext,
-  IExecutionEventBus,
+  ExecutionEventBus,
   DefaultRequestHandler,
   AgentCard,
   Task,
@@ -16,7 +16,7 @@ import {
   TaskState,
   TaskStatusUpdateEvent,
   TextPart,
-} from "a2a-sdk"; // Import server components
+} from "@a2a-js/sdk"; // Import server components
 import { ai } from "./genkit.js";
 import { CodeMessage } from "./code-format.js"; // CodeMessageSchema might not be needed here
 
@@ -33,7 +33,7 @@ class CoderAgentExecutor implements AgentExecutor {
 
   public cancelTask = async (
         taskId: string,
-        eventBus: IExecutionEventBus,
+        eventBus: ExecutionEventBus,
     ): Promise<void> => {
         this.cancelledTasks.add(taskId);
         // The execute loop is responsible for publishing the final state
@@ -41,7 +41,7 @@ class CoderAgentExecutor implements AgentExecutor {
 
   async execute(
     requestContext: RequestContext,
-    eventBus: IExecutionEventBus
+    eventBus: ExecutionEventBus
   ): Promise<void> {
     const userMessage = requestContext.userMessage;
     const existingTask = requestContext.task;
@@ -60,7 +60,7 @@ class CoderAgentExecutor implements AgentExecutor {
         id: taskId,
         contextId: contextId,
         status: {
-          state: TaskState.Submitted,
+          state: 'submitted',
           timestamp: new Date().toISOString(),
         },
         history: [userMessage],
@@ -76,7 +76,7 @@ class CoderAgentExecutor implements AgentExecutor {
       taskId: taskId,
       contextId: contextId,
       status: {
-        state: TaskState.Working,
+        state: 'working',
         message: {
           kind: 'message',
           role: 'agent',
@@ -117,7 +117,7 @@ class CoderAgentExecutor implements AgentExecutor {
         taskId: taskId,
         contextId: contextId,
         status: {
-          state: TaskState.Failed,
+          state: 'failed',
           message: {
             kind: 'message',
             role: 'agent',
@@ -194,7 +194,7 @@ class CoderAgentExecutor implements AgentExecutor {
               taskId: taskId,
               contextId: contextId,
               status: {
-                state: TaskState.Canceled,
+                state: 'canceled',
                 timestamp: new Date().toISOString(),
               },
               final: true,
@@ -236,7 +236,7 @@ class CoderAgentExecutor implements AgentExecutor {
         taskId: taskId,
         contextId: contextId,
         status: {
-          state: TaskState.Completed,
+          state: 'completed',
           message: {
             kind: 'message',
             role: 'agent',
@@ -260,7 +260,7 @@ class CoderAgentExecutor implements AgentExecutor {
       eventBus.publish(finalUpdate);
 
       console.log(
-        `[CoderAgentExecutor] Task ${taskId} finished with state: ${TaskState.Completed} `
+        `[CoderAgentExecutor] Task ${taskId} finished with state: completed `
       );
 
     } catch (error: any) {
@@ -273,7 +273,7 @@ class CoderAgentExecutor implements AgentExecutor {
         taskId: taskId,
         contextId: contextId,
         status: {
-          state: TaskState.Failed,
+          state: 'failed',
           message: {
             kind: 'message',
             role: 'agent',
