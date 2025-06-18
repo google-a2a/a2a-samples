@@ -1,0 +1,35 @@
+name: Lint
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install the latest version of uv and set the python version to 3.13
+      uses: astral-sh/setup-uv@v6
+      with:
+        python-version: 3.13
+        activate-environment: true
+
+    - name: Install dependencies
+      run: |
+        uv pip install nox
+
+    - name: Run linting with nox
+      run: |
+        nox -s format
+
+    - name: Check if files were modified
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Files were modified by formatting. Please run 'nox -s format' locally."
+          git diff
+          exit 1
+        fi

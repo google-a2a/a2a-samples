@@ -5,7 +5,7 @@ from collections.abc import AsyncGenerator, Callable, Generator
 from pathlib import Path
 from typing import Literal
 
-import google.generativeai as genai
+import google.genai as genai
 from jinja2 import Template
 from mcp.types import CallToolResult
 
@@ -33,9 +33,11 @@ def stream_llm(prompt: str) -> Generator[str, None]:
     Returns:
         Generator[str, None, None]: A generator of the LLM response.
     """
-    genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    for chunk in model.generate_content(prompt, stream=True):
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+    for chunk in client.models.generate_content_stream(
+        model='gemini-1.5-flash',
+        contents=prompt,
+    ):
         yield chunk.text
 
 

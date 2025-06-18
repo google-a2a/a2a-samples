@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal
 from uuid import uuid4
 
-import google.generativeai as genai
+import google.genai as genai
 import httpx
 from a2a.client import A2ACardResolver, A2AClient
 from a2a.types import (
@@ -46,9 +46,11 @@ def stream_llm(prompt: str) -> Generator[str]:
     Returns:
         Generator[str, None, None]: A generator of the LLM response.
     """
-    genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    for chunk in model.generate_content(prompt, stream=True):
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+    for chunk in client.models.generate_content_stream(
+        model='gemini-1.5-flash',
+        contents=prompt,
+    ):
         yield chunk.text
 
 
@@ -170,7 +172,7 @@ class Agent:
                 )
             )
 
-            streaming_request = SendStreamingMessageRequest(params=message)
+            streaming_request = SendStreamingMessageRequest(id=str(uuid4().hex), params=message)
             async for chunk in client.send_message_streaming(streaming_request):
                 if isinstance(
                     chunk.root, SendStreamingMessageSuccessResponse
