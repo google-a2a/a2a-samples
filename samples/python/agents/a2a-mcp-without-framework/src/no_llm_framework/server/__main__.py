@@ -1,7 +1,7 @@
 import click
 import uvicorn
 from a2a.server.agent_execution import AgentExecutor
-from a2a.server.apps.starlette_app import A2AStarletteApplication
+from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers.default_request_handler import (
     DefaultRequestHandler,
 )
