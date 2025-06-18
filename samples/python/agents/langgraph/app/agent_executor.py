@@ -44,7 +44,7 @@ class CurrencyAgentExecutor(AgentExecutor):
         task = context.current_task
         if not task:
             task = new_task(context.message)
-            await event_queue.enqueue_event(task)
+            event_queue.enqueue_event(task)
         updater = TaskUpdater(event_queue, task.id, task.contextId)
         try:
             async for item in self.agent.stream(query, task.contextId):
@@ -52,7 +52,7 @@ class CurrencyAgentExecutor(AgentExecutor):
                 require_user_input = item['require_user_input']
 
                 if not is_task_complete and not require_user_input:
-                    await updater.update_status(
+                    updater.update_status(
                         TaskState.working,
                         new_agent_text_message(
                             item['content'],
@@ -61,7 +61,7 @@ class CurrencyAgentExecutor(AgentExecutor):
                         ),
                     )
                 elif require_user_input:
-                    await updater.update_status(
+                    updater.update_status(
                         TaskState.input_required,
                         new_agent_text_message(
                             item['content'],
@@ -72,11 +72,11 @@ class CurrencyAgentExecutor(AgentExecutor):
                     )
                     break
                 else:
-                    await updater.add_artifact(
+                    updater.add_artifact(
                         [Part(root=TextPart(text=item['content']))],
                         name='conversion_result',
                     )
-                    await updater.complete()
+                    updater.complete()
                     break
 
         except Exception as e:
