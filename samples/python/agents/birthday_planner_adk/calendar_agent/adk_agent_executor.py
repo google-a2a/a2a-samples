@@ -5,15 +5,6 @@ import time
 
 from typing import NamedTuple
 
-from google.adk import Runner
-from google.adk.auth import AuthConfig, AuthCredential, AuthScheme
-from google.adk.events import Event, EventActions
-from google.adk.sessions import Session
-from google.adk.tools.openapi_tool.openapi_spec_parser.tool_auth_handler import (
-    ToolContextCredentialStore,
-)
-from google.genai import types
-
 from a2a.server.agent_execution import AgentExecutor
 from a2a.server.agent_execution.context import RequestContext
 from a2a.server.events.event_queue import EventQueue
@@ -30,6 +21,14 @@ from a2a.types import (
 )
 from a2a.utils.errors import ServerError
 from a2a.utils.message import new_agent_text_message
+from google.adk import Runner
+from google.adk.auth import AuthConfig, AuthCredential, AuthScheme
+from google.adk.events import Event, EventActions
+from google.adk.sessions import Session
+from google.adk.tools.openapi_tool.openapi_spec_parser.tool_auth_handler import (
+    ToolContextCredentialStore,
+)
+from google.genai import types
 
 
 logger = logging.getLogger(__name__)
@@ -250,7 +249,7 @@ class ADKAgentExecutor(AgentExecutor):
         user_id = 'anonymous'
         if context.call_context and context.call_context.user.is_authenticated:
             user_id = context.call_context.user.username
-        
+
         session = await self.runner.session_service.get_session(
             app_name=self.runner.app_name,
             user_id=user_id,

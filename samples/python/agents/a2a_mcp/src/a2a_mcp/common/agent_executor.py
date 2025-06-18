@@ -77,7 +77,7 @@ class GenericAgentExecutor(AgentExecutor):
                 )
                 await updater.complete()
                 break
-            elif require_user_input:
+            if require_user_input:
                 await updater.update_status(
                     TaskState.input_required,
                     new_agent_text_message(
@@ -88,19 +88,17 @@ class GenericAgentExecutor(AgentExecutor):
                     final=True,
                 )
                 break
-            else:
-                await updater.update_status(
-                    TaskState.working,
-                    new_agent_text_message(
-                        item['content'],
-                        task.contextId,
-                        task.id,
-                    ),
-                )
+            await updater.update_status(
+                TaskState.working,
+                new_agent_text_message(
+                    item['content'],
+                    task.contextId,
+                    task.id,
+                ),
+            )
 
     def _validate_request(self, context: RequestContext) -> bool:
         return False
-
 
     async def cancel(
         self, request: RequestContext, event_queue: EventQueue

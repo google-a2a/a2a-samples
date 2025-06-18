@@ -1,40 +1,41 @@
 import json
-import sys
 import os
+import sys
 
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
 from collections.abc import AsyncGenerator
 
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_openai import ChatOpenAI
+
+
 class TravelPlannerAgent:
-    """ travel planner Agent."""
+    """travel planner Agent."""
 
     def __init__(self):
         """Initialize the travel dialogue model"""
         try:
-            with open("config.json") as f:
+            with open('config.json') as f:
                 config = json.load(f)
-            if not os.getenv(config["api_key"]):
+            if not os.getenv(config['api_key']):
                 print(f'{config["api_key"]} environment variable not set.')
                 sys.exit(1)
-            api_key = os.getenv(config["api_key"])
+            api_key = os.getenv(config['api_key'])
 
             self.model = ChatOpenAI(
-                model=config["model_name"],
-                base_url=config["base_url"],
+                model=config['model_name'],
+                base_url=config['base_url'],
                 api_key=api_key,
-                temperature=0.7  # Control the generation randomness (0-2, higher values indicate greater randomness)
+                temperature=0.7,  # Control the generation randomness (0-2, higher values indicate greater randomness)
             )
         except FileNotFoundError:
-            print("Error: The configuration file config.json cannot be found.")
+            print('Error: The configuration file config.json cannot be found.')
             exit()
         except KeyError as e:
-            print(f"The configuration file is missing required fields: {e}")
+            print(f'The configuration file is missing required fields: {e}')
             exit()
 
     async def stream(self, query: str) -> AsyncGenerator[str, None]:
-
-        """Stream the response of the large model back to the client. """
+        """Stream the response of the large model back to the client."""
         try:
             # Initialize the conversation history (system messages can be added)
             messages = [
@@ -75,7 +76,8 @@ class TravelPlannerAgent:
             yield {'content': '', 'done': True}
 
         except Exception as e:
-            print(f"error：{str(e)}")
-            yield {'content': 'Sorry, an error occurred while processing your request.', 'done': True}
-
-
+            print(f'error：{e!s}')
+            yield {
+                'content': 'Sorry, an error occurred while processing your request.',
+                'done': True,
+            }

@@ -3,8 +3,6 @@ import base64
 import json
 import uuid
 
-from typing import List
-
 import httpx
 
 from a2a.client import A2ACardResolver
@@ -47,9 +45,13 @@ class HostAgent:
         self.cards: dict[str, AgentCard] = {}
         self.agents: str = ''
         loop = asyncio.get_running_loop()
-        loop.create_task(self.init_remote_agent_addresses(remote_agent_addresses))
+        loop.create_task(
+            self.init_remote_agent_addresses(remote_agent_addresses)
+        )
 
-    async def init_remote_agent_addresses(self, remote_agent_addresses: list[str]):
+    async def init_remote_agent_addresses(
+        self, remote_agent_addresses: list[str]
+    ):
         async with asyncio.TaskGroup() as task_group:
             for address in remote_agent_addresses:
                 task_group.create_task(self.retrieve_card(address))
@@ -229,9 +231,9 @@ async def convert_parts(parts: list[Part], tool_context: ToolContext):
 async def convert_part(part: Part, tool_context: ToolContext):
     if part.root.kind == 'text':
         return part.root.text
-    elif part.root.kind == 'data':
+    if part.root.kind == 'data':
         return part.root.data
-    elif part.root.kind == 'file':
+    if part.root.kind == 'file':
         # Repackage A2A FilePart to google.genai Blob
         # Currently not considering plain text as files
         file_id = part.root.file.name

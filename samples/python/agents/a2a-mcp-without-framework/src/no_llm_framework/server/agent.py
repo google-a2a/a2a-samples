@@ -5,7 +5,7 @@ from collections.abc import AsyncGenerator, Callable, Generator
 from pathlib import Path
 from typing import Literal
 
-import google.genai as genai
+from google import genai
 from jinja2 import Template
 from mcp.types import CallToolResult
 
@@ -62,7 +62,7 @@ class Agent:
 
         Returns:
             Generator[str, None]: A generator yielding the LLM's response.
-        """   # noqa: E501
+        """  # noqa: E501
         return stream_llm(prompt)
 
     async def decide(

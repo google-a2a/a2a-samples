@@ -6,6 +6,19 @@ import os
 
 import click
 import uvicorn
+
+from a2a.server.apps import A2AStarletteApplication
+from a2a.server.request_handlers import DefaultRequestHandler
+from a2a.server.tasks import InMemoryTaskStore
+from a2a.types import (
+    AgentCapabilities,
+    AgentCard,
+    AgentSkill,
+    AuthorizationCodeOAuthFlow,
+    OAuth2SecurityScheme,
+    OAuthFlows,
+    SecurityScheme,
+)
 from adk_agent import create_agent  # type: ignore[import-not-found]
 from adk_agent_executor import ADKAgentExecutor  # type: ignore[import-untyped]
 from dotenv import load_dotenv
@@ -31,19 +44,6 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 from starlette.requests import HTTPConnection, Request
 from starlette.responses import PlainTextResponse
 from starlette.routing import Route
-
-from a2a.server.apps import A2AStarletteApplication
-from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.server.tasks import InMemoryTaskStore
-from a2a.types import (
-    AgentCapabilities,
-    AgentCard,
-    AgentSkill,
-    AuthorizationCodeOAuthFlow,
-    OAuth2SecurityScheme,
-    OAuthFlows,
-    SecurityScheme,
-)
 
 
 load_dotenv()
@@ -94,16 +94,16 @@ def main(host: str, port: int):
     )
 
     # Define OAuth2 security scheme.
-    OAUTH_SCHEME_NAME = "CalendarGoogleOAuth"
+    OAUTH_SCHEME_NAME = 'CalendarGoogleOAuth'
     oauth_scheme = OAuth2SecurityScheme(
-        type="oauth2",
-        description="OAuth2 for Google Calendar API",
+        type='oauth2',
+        description='OAuth2 for Google Calendar API',
         flows=OAuthFlows(
             authorizationCode=AuthorizationCodeOAuthFlow(
-                authorizationUrl="https://accounts.google.com/o/oauth2/auth",
-                tokenUrl="https://oauth2.googleapis.com/token",
+                authorizationUrl='https://accounts.google.com/o/oauth2/auth',
+                tokenUrl='https://oauth2.googleapis.com/token',
                 scopes={
-                    "https://www.googleapis.com/auth/calendar": "Access Google Calendar"
+                    'https://www.googleapis.com/auth/calendar': 'Access Google Calendar'
                 },
             )
         ),
@@ -119,12 +119,10 @@ def main(host: str, port: int):
         defaultOutputModes=['text'],
         capabilities=AgentCapabilities(streaming=True),
         skills=[skill],
-        securitySchemes={
-            OAUTH_SCHEME_NAME: SecurityScheme(root=oauth_scheme)
-        },
+        securitySchemes={OAUTH_SCHEME_NAME: SecurityScheme(root=oauth_scheme)},
         # Declare that this scheme is required to use the agent's skills
         security=[
-            {OAUTH_SCHEME_NAME: ["https://www.googleapis.com/auth/calendar"]}
+            {OAUTH_SCHEME_NAME: ['https://www.googleapis.com/auth/calendar']}
         ],
     )
 

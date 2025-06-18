@@ -1,11 +1,11 @@
-# ruff: noqa: E501, G201, G202
+# ruff: noqa: E501
 # pylint: disable=logging-fstring-interpolation
 import asyncio
 import json
 import os
 import uuid
 
-from typing import Any, AsyncIterator
+from typing import Any
 
 import httpx
 
@@ -18,7 +18,6 @@ from a2a.types import (
     SendMessageResponse,
     SendMessageSuccessResponse,
     Task,
-    TaskState,
 )
 from agents.airbnb_planner_multiagent.host_agent.remote_agent_connection import (
     RemoteAgentConnections,
@@ -270,15 +269,18 @@ class RoutingAgent:
         send_response: SendMessageResponse = await client.send_message(
             message_request=message_request
         )
-        print('send_response', send_response.model_dump_json(exclude_none=True, indent=2))
+        print(
+            'send_response',
+            send_response.model_dump_json(exclude_none=True, indent=2),
+        )
 
         if not isinstance(send_response.root, SendMessageSuccessResponse):
             print('received non-success response. Aborting get task ')
-            return
+            return None
 
         if not isinstance(send_response.root.result, Task):
             print('received non-task response. Aborting get task ')
-            return
+            return None
 
         return send_response.root.result
 

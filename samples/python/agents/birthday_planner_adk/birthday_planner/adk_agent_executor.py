@@ -8,16 +8,6 @@ from uuid import uuid4
 
 import httpx
 
-from google.adk import Runner
-from google.adk.agents import LlmAgent, RunConfig
-from google.adk.artifacts import InMemoryArtifactService
-from google.adk.events import Event
-from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
-from google.adk.sessions import InMemorySessionService
-from google.adk.tools import BaseTool, ToolContext
-from google.genai import types
-from pydantic import ConfigDict
-
 from a2a.client import A2AClient
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events.event_queue import EventQueue
@@ -44,6 +34,15 @@ from a2a.types import (
 )
 from a2a.utils import get_text_parts
 from a2a.utils.errors import ServerError
+from google.adk import Runner
+from google.adk.agents import LlmAgent, RunConfig
+from google.adk.artifacts import InMemoryArtifactService
+from google.adk.events import Event
+from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
+from google.adk.sessions import InMemorySessionService
+from google.adk.tools import BaseTool, ToolContext
+from google.genai import types
+from pydantic import ConfigDict
 
 
 logger = logging.getLogger(__name__)
@@ -207,7 +206,10 @@ class ADKAgentExecutor(AgentExecutor):
             while not self._is_task_complete(dependent_task):
                 await asyncio.sleep(AUTH_TASK_POLLING_DELAY_SECONDS)
                 response = await a2a_client.get_task(
-                    GetTaskRequest(id=str(uuid4()), params=TaskQueryParams(id=dependent_task.id))
+                    GetTaskRequest(
+                        id=str(uuid4()),
+                        params=TaskQueryParams(id=dependent_task.id),
+                    )
                 )
                 if not isinstance(response.root, GetTaskSuccessResponse):
                     logger.debug('Getting dependent task failed: %s', response)
@@ -269,7 +271,7 @@ class ADKAgentExecutor(AgentExecutor):
                     role=Role.user,
                     parts=[Part(TextPart(text=message))],
                 )
-            )
+            ),
         )
         response = await self._send_agent_message(request)
         logger.debug('[A2A Client] Received response: %s', response)

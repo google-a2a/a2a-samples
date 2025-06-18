@@ -3,7 +3,6 @@ import logging
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events.event_queue import EventQueue
 from a2a.types import (
-    AgentCard,
     TaskArtifactUpdateEvent,
     TaskState,
     TaskStatus,
@@ -102,7 +101,7 @@ class CurrencyAgentExecutor(AgentExecutor):
         self, context: RequestContext, event_queue: EventQueue
     ) -> None:
         raise Exception('cancel not supported')
-    
+
 
 # def create_foundry_agent_executor(card: AgentCard) -> CurrencyAgentExecutor:
 #     """Factory function to create a Foundry agent executor."""

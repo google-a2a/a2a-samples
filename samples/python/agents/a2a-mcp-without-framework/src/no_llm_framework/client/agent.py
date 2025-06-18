@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal
 from uuid import uuid4
 
-import google.genai as genai
+from google import genai
 import httpx
 from a2a.client import A2ACardResolver, A2AClient
 from a2a.types import (
@@ -172,7 +172,9 @@ class Agent:
                 )
             )
 
-            streaming_request = SendStreamingMessageRequest(id=str(uuid4().hex), params=message)
+            streaming_request = SendStreamingMessageRequest(
+                id=str(uuid4().hex), params=message
+            )
             async for chunk in client.send_message_streaming(streaming_request):
                 if isinstance(
                     chunk.root, SendStreamingMessageSuccessResponse

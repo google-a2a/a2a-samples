@@ -1,6 +1,5 @@
 import json
 
-
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
@@ -72,24 +71,22 @@ class ReimbursementAgentExecutor(AgentExecutor):
                         final=True,
                     )
                     continue
-                else:
-                    await updater.update_status(
-                        TaskState.failed,
-                        new_agent_text_message(
-                            'Reaching an unexpected state',
-                            task.contextId,
-                            task.id,
-                        ),
-                        final=True,
-                    )
-                    break
-            else:
-                # Emit the appropriate events
-                await updater.add_artifact(
-                    [Part(root=TextPart(text=item['content']))], name='form'
+                await updater.update_status(
+                    TaskState.failed,
+                    new_agent_text_message(
+                        'Reaching an unexpected state',
+                        task.contextId,
+                        task.id,
+                    ),
+                    final=True,
                 )
-                await updater.complete()
                 break
+            # Emit the appropriate events
+            await updater.add_artifact(
+                [Part(root=TextPart(text=item['content']))], name='form'
+            )
+            await updater.complete()
+            break
 
     async def cancel(
         self, request: RequestContext, event_queue: EventQueue
