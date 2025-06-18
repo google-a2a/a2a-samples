@@ -2,11 +2,7 @@ import logging
 import os
 
 import click
-import uvicorn  
-from openai_agent import create_agent  # type: ignore[import-not-found] 
-from openai_agent_executor import OpenAIAgentExecutor  # type: ignore[import-untyped]
-from dotenv import load_dotenv
-from starlette.applications import Starlette
+import uvicorn
 
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
@@ -16,6 +12,12 @@ from a2a.types import (
     AgentCard,
     AgentSkill,
 )
+from dotenv import load_dotenv
+from openai_agent import create_agent  # type: ignore[import-not-found]
+from openai_agent_executor import (
+    OpenAIAgentExecutor,  # type: ignore[import-untyped]
+)
+from starlette.applications import Starlette
 
 
 load_dotenv()
@@ -29,26 +31,24 @@ logging.basicConfig()
 def main(host: str, port: int):
     # Verify an API key is set.
     if not os.getenv('OPENROUTER_API_KEY'):
-        raise ValueError(
-            'OPENROUTER_API_KEY environment variable not set'
-        )
+        raise ValueError('OPENROUTER_API_KEY environment variable not set')
 
     skill = AgentSkill(
         id='github_repositories',
         name='GitHub Repositories',
-        description="Query GitHub repositories, recent updates, commits, and project activity",
+        description='Query GitHub repositories, recent updates, commits, and project activity',
         tags=['github', 'repositories', 'commits'],
         examples=[
             'Show my recent repository updates',
             'What are the latest commits in my project?',
-            'Search for popular Python repositories with recent activity'
+            'Search for popular Python repositories with recent activity',
         ],
     )
 
     # AgentCard for OpenAI-based agent
     agent_card = AgentCard(
         name='GitHub Agent',
-        description="An agent that can query GitHub repositories and recent project updates",
+        description='An agent that can query GitHub repositories and recent project updates',
         url=f'http://{host}:{port}/',
         version='1.0.0',
         defaultInputModes=['text'],
@@ -64,7 +64,7 @@ def main(host: str, port: int):
         card=agent_card,
         tools=agent_data['tools'],
         api_key=os.getenv('OPENROUTER_API_KEY'),
-        system_prompt=agent_data['system_prompt']
+        system_prompt=agent_data['system_prompt'],
     )
 
     request_handler = DefaultRequestHandler(
@@ -75,7 +75,7 @@ def main(host: str, port: int):
         agent_card=agent_card, http_handler=request_handler
     )
     routes = a2a_app.routes()
-    
+
     app = Starlette(routes=routes)
 
     uvicorn.run(app, host=host, port=port)

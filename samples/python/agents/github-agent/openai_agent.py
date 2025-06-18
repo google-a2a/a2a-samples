@@ -1,4 +1,3 @@
-import os
 from github_toolset import GitHubToolset  # type: ignore[import-untyped]
 
 
@@ -6,7 +5,7 @@ def create_agent():
     """Create OpenAI agent and its tools"""
     toolset = GitHubToolset()
     tools = toolset.get_tools()
-    
+
     return {
         'tools': tools,
         'system_prompt': """You are a GitHub agent that can help users query information about GitHub repositories and recent project updates.
@@ -26,5 +25,5 @@ When displaying repository information, include relevant details like:
 - Stars and forks count
 - Recent commit information when available
 
-Always provide helpful and accurate information based on the GitHub API results. Respond in Chinese unless the user specifically requests English."""
-    } 
+Always provide helpful and accurate information based on the GitHub API results. Respond in Chinese unless the user specifically requests English.""",
+    }
