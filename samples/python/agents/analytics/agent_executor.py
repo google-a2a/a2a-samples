@@ -1,5 +1,3 @@
-from typing import Any
-
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.types import (
@@ -17,7 +15,7 @@ from a2a.utils import (
 )
 from a2a.utils.errors import ServerError
 from agent import ChartGenerationAgent
-from typing_extensions import override
+
 
 class ChartGenerationAgentExecutor(AgentExecutor):
     def __init__(self):
@@ -36,7 +34,9 @@ class ChartGenerationAgentExecutor(AgentExecutor):
         try:
             result = self.agent.invoke(query, context.context_id)
         except Exception as e:
-            raise ServerError(error=ValueError(f'Error invoking agent: {e}')) from e
+            raise ServerError(
+                error=ValueError(f'Error invoking agent: {e}')
+            ) from e
 
         data = self.agent.get_image_data(
             session_id=context.context_id, image_key=result.raw
@@ -58,7 +58,9 @@ class ChartGenerationAgentExecutor(AgentExecutor):
             parts = [
                 Part(
                     root=TextPart(
-                        text=data.error if data else 'Failed to generate chart image.'
+                        text=data.error
+                        if data
+                        else 'Failed to generate chart image.'
                     ),
                 )
             ]

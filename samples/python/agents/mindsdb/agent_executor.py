@@ -1,7 +1,7 @@
 import logging
 
 from a2a.server.agent_execution import AgentExecutor, RequestContext
-from a2a.server.events import Event, EventQueue
+from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import InternalError, TaskState, UnsupportedOperationError
 from a2a.utils import new_agent_text_message, new_task
@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class MindsDBAgentExecutor(AgentExecutor):
-    """
-    A MindsDB agent executor.
-    """
+    """A MindsDB agent executor."""
 
     def __init__(self):
         self.agent = MindsDBAgent()

@@ -3,12 +3,13 @@ import base64
 import os
 import threading
 import uuid
+
 from typing import cast
 
 import httpx
 
 from a2a.types import FilePart, FileWithUri, Message, Part
-from fastapi import APIRouter, FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response
 
 from service.types import (
     CreateConversationResponse,
@@ -98,11 +99,15 @@ class ConversationServer:
         loop = asyncio.get_event_loop()
         if isinstance(self.manager, ADKHostManager):
             t = threading.Thread(
-                target=lambda: cast(ADKHostManager, self.manager).process_message_threadsafe(message, loop)
+                target=lambda: cast(
+                    ADKHostManager, self.manager
+                ).process_message_threadsafe(message, loop)
             )
         else:
             t = threading.Thread(
-                target=lambda: asyncio.run(self.manager.process_message(message))
+                target=lambda: asyncio.run(
+                    self.manager.process_message(message)
+                )
             )
         t.start()
         return SendMessageResponse(

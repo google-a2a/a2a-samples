@@ -27,6 +27,7 @@ members = [
     "agents/google_adk",
     "agents/marvin",
     "hosts/cli",
+    "hosts/cli_auth",
     "hosts/extended_agent_card_cli",
     "hosts/multiagent",
     "agents/airbnb_planner_multiagent",
@@ -36,11 +37,12 @@ members = [
     "agents/extended_agent_card_adk",
     "agents/veo_video_gen",
     "agents/dice_agent_grpc",
-    # "agents/ag2", # it can be added back as a member after https://github.com/ag2ai/ag2/pull/1881
+    "agents/ag2",
 ]
 
 [tool.uv.sources]
 veo-video-sample-agent = { workspace = true }
+a2a-sample-client-cli = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
