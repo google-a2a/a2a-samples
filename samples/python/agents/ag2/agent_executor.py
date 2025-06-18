@@ -17,9 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class AG2AgentExecutor(AgentExecutor):
-    """
-    A YoutubeMCPAgent agent executor.
-    """
+    """A YoutubeMCPAgent agent executor."""
 
     def __init__(self):
         self.agent = YoutubeMCPAgent()

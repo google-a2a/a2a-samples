@@ -1,20 +1,18 @@
 import asyncio
 import logging
-import grpc
-from grpc_reflection.v1alpha import reflection
 import os
 
 import asyncclick as click
+import grpc
 
-from agent_executor import DiceAgentExecutor  # type: ignore[import-untyped]
-from dotenv import load_dotenv
-
-from a2a.server.request_handlers import DefaultRequestHandler
+from a2a.grpc import a2a_pb2, a2a_pb2_grpc
+from a2a.server.request_handlers import DefaultRequestHandler, GrpcHandler
 from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import AgentCapabilities, AgentCard, AgentSkill
-from a2a.server.request_handlers import GrpcHandler
-from a2a.grpc import a2a_pb2_grpc
-from a2a.grpc import a2a_pb2
+from agent_executor import DiceAgentExecutor  # type: ignore[import-untyped]
+from dotenv import load_dotenv
+from grpc_reflection.v1alpha import reflection
+
 
 load_dotenv()
 
@@ -39,7 +37,7 @@ async def main(host: str, port: int):
         AgentSkill(
             id='f56cab88-3fe9-47ec-ba6e-86a13c9f1f74',
             name='Roll Dice',
-            description="Rolls an N sided dice and returns the result. By default uses a 6 sided dice.",
+            description='Rolls an N sided dice and returns the result. By default uses a 6 sided dice.',
             tags=['dice'],
             examples=['Can you roll an 11 sided dice?'],
         ),
@@ -54,7 +52,7 @@ async def main(host: str, port: int):
 
     agent_card = AgentCard(
         name='Dice Agent',
-        description="An agent that can roll arbitrary dice and answer if numbers are prime",
+        description='An agent that can roll arbitrary dice and answer if numbers are prime',
         url=f'http://{host}:{port}/',
         version='1.0.0',
         defaultInputModes=['text'],
@@ -74,7 +72,7 @@ async def main(host: str, port: int):
         server,
     )
     SERVICE_NAMES = (
-        a2a_pb2.DESCRIPTOR.services_by_name["A2AService"].full_name,
+        a2a_pb2.DESCRIPTOR.services_by_name['A2AService'].full_name,
         reflection.SERVICE_NAME,
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)

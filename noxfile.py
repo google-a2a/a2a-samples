@@ -23,7 +23,7 @@ import subprocess
 import nox
 
 
-DEFAULT_PYTHON_VERSION = '3.11'
+DEFAULT_PYTHON_VERSION = '3.10'
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 

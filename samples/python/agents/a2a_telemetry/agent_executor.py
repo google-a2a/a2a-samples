@@ -4,6 +4,7 @@ from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import TaskState, TextPart, UnsupportedOperationError
+from a2a.utils import new_agent_text_message
 from a2a.utils.errors import ServerError
 from google.adk import Runner
 from google.adk.agents import LlmAgent
@@ -12,7 +13,7 @@ from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.sessions import InMemorySessionService
 from google.adk.tools import google_search_tool
 from google.genai import types
-from a2a.utils import new_agent_text_message
+
 
 logger = logging.getLogger(__name__)
 
@@ -87,14 +88,14 @@ class QnAAgentExecutor(AgentExecutor):
                 )
                 await updater.complete()
                 break
-            else:
-                await updater.update_status(
-                    TaskState.working,
-                    message=new_agent_text_message('Working...')
-                )
+            await updater.update_status(
+                TaskState.working, message=new_agent_text_message('Working...')
+            )
         else:
             logger.debug('Agent failed to complete')
             await updater.update_status(
                 TaskState.failed,
-                message=new_agent_text_message('Failed to generate a response.'),
+                message=new_agent_text_message(
+                    'Failed to generate a response.'
+                ),
             )
