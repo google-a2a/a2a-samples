@@ -1,16 +1,16 @@
 [project]
 name = "no-llm-framework"
 version = "0.1.0"
-description = "Add your description here"
+description = "Use A2A without any agent framework"
 readme = "README.md"
 authors = [{ name = "prem", email = "prem.ch@ku.th" }]
 requires-python = ">=3.13"
 dependencies = [
-    "a2a-sdk>=0.2.6",
+    "a2a-sdk>=0.2.8",
     "asyncclick>=8.1.8",
     "colorama>=0.4.6",
     "fastmcp>=2.3.4",
-    "google-generativeai>=0.8.5",
+    "google-genai",
     "jinja2>=3.1.6",
     "rich>=14.0.0",
 ]

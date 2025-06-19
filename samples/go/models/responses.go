@@ -31,8 +31,8 @@ type SendTaskResponse struct {
 // SendTaskStreamingResponse represents a response to a streaming task request
 type SendTaskStreamingResponse struct {
 	JSONRPCResponse
-	Result interface{} `json:"result,omitempty"` // Can be TaskStatusUpdateEvent or TaskArtifactUpdateEvent
-	Error  *A2AError   `json:"error,omitempty"`
+	Result any       `json:"result,omitempty"` // Can be TaskStatusUpdateEvent or TaskArtifactUpdateEvent
+	Error  *A2AError `json:"error,omitempty"`
 }
 
 // GetTaskResponse represents a response to a get task request

@@ -10,18 +10,18 @@ from mcp.server.fastmcp import FastMCP
 
 
 # Initialize FastMCP server
-mcp = FastMCP("weather")
+mcp = FastMCP('weather')
 
 # --- Configuration & Constants ---
-BASE_URL = "https://api.weather.gov"
-USER_AGENT = "weather-agent"
+BASE_URL = 'https://api.weather.gov'
+USER_AGENT = 'weather-agent'
 REQUEST_TIMEOUT = 20.0
 GEOCODE_TIMEOUT = 10.0  # Timeout for geocoding requests
 
 # --- Shared HTTP Client ---
 http_client = httpx.AsyncClient(
     base_url=BASE_URL,
-    headers={"User-Agent": USER_AGENT, "Accept": "application/geo+json"},
+    headers={'User-Agent': USER_AGENT, 'Accept': 'application/geo+json'},
     timeout=REQUEST_TIMEOUT,
     follow_redirects=True,
 )
@@ -63,7 +63,7 @@ async def get_weather_response(endpoint: str) -> dict[str, Any] | None:
 
 def format_alert(feature: dict[str, Any]) -> str:
     """Format an alert feature into a readable string."""
-    props = feature.get("properties", {})  # Safer access
+    props = feature.get('properties', {})  # Safer access
     # Use .get() with default values for robustness
     return f"""
             Event: {props.get('event', 'Unknown Event')}
@@ -82,7 +82,7 @@ def format_forecast_period(period: dict[str, Any]) -> str:
     """Formats a single forecast period into a readable string."""
     return f"""
            {period.get('name', 'Unknown Period')}:
-             Temperature: {period.get('temperature', 'N/A')}°{period.get           ('temperatureUnit', 'F')}
+             Temperature: {period.get('temperature', 'N/A')}°{period.get('temperatureUnit', 'F')}
              Wind: {period.get('windSpeed', 'N/A')} {period.get('windDirection', 'N/A')}
              Short Forecast: {period.get('shortForecast', 'N/A')}
              Detailed Forecast: {period.get('detailedForecast', 'No detailed forecast            provided.').strip()}
@@ -101,22 +101,22 @@ async def get_alerts(state: str) -> str:
     """
     # Input validation and normalization
     if not isinstance(state, str) or len(state) != 2 or not state.isalpha():
-        return "Invalid input. Please provide a two-letter US state code (e.g., CA)."
+        return 'Invalid input. Please provide a two-letter US state code (e.g., CA).'
     state_code = state.upper()
 
-    endpoint = f"/alerts/active/area/{state_code}"
+    endpoint = f'/alerts/active/area/{state_code}'
     data = await get_weather_response(endpoint)
 
     if data is None:
         # Error occurred during request
-        return f"Failed to retrieve weather alerts for {state_code}."
+        return f'Failed to retrieve weather alerts for {state_code}.'
 
-    features = data.get("features")
+    features = data.get('features')
     if not features:  # Handles both null and empty list
-        return f"No active weather alerts found for {state_code}."
+        return f'No active weather alerts found for {state_code}.'
 
     alerts = [format_alert(feature) for feature in features]
-    return "\n---\n".join(alerts)
+    return '\n---\n'.join(alerts)
 
 
 @mcp.tool()
@@ -129,20 +129,20 @@ async def get_forecast(latitude: float, longitude: float) -> str:
     """
     # Input validation
     if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
-        return "Invalid latitude or longitude provided. Latitude must be between -90 and 90, Longitude between -180 and 180."
+        return 'Invalid latitude or longitude provided. Latitude must be between -90 and 90, Longitude between -180 and 180.'
 
     # NWS API requires latitude,longitude format with up to 4 decimal places
-    point_endpoint = f"/points/{latitude:.4f},{longitude:.4f}"
+    point_endpoint = f'/points/{latitude:.4f},{longitude:.4f}'
     points_data = await get_weather_response(point_endpoint)
 
-    if points_data is None or "properties" not in points_data:
-        return f"Unable to retrieve NWS gridpoint information for {latitude:.4f},{longitude:.4f}."
+    if points_data is None or 'properties' not in points_data:
+        return f'Unable to retrieve NWS gridpoint information for {latitude:.4f},{longitude:.4f}.'
 
     # Extract forecast URLs from the gridpoint data
-    forecast_url = points_data["properties"].get("forecast")
+    forecast_url = points_data['properties'].get('forecast')
 
     if not forecast_url:
-        return f"Could not find the NWS forecast endpoint for {latitude:.4f},{longitude:.4f}."
+        return f'Could not find the NWS forecast endpoint for {latitude:.4f},{longitude:.4f}.'
 
     # Make the request to the specific forecast URL
     forecast_data = None
@@ -159,17 +159,17 @@ async def get_forecast(latitude: float, longitude: float) -> str:
     except Exception:
         pass  # Error handled by returning None below
 
-    if forecast_data is None or "properties" not in forecast_data:
-        return "Failed to retrieve detailed forecast data from NWS."
+    if forecast_data is None or 'properties' not in forecast_data:
+        return 'Failed to retrieve detailed forecast data from NWS.'
 
-    periods = forecast_data["properties"].get("periods")
+    periods = forecast_data['properties'].get('periods')
     if not periods:
-        return "No forecast periods found for this location from NWS."
+        return 'No forecast periods found for this location from NWS.'
 
     # Format the first 5 periods
     forecasts = [format_forecast_period(period) for period in periods[:5]]
 
-    return "\n---\n".join(forecasts)
+    return '\n---\n'.join(forecasts)
 
 
 # --- NEW: get_forecast_by_city Tool ---
@@ -183,19 +183,19 @@ async def get_forecast_by_city(city: str, state: str) -> str:
     """
     # --- Input Validation ---
     if not city or not isinstance(city, str):
-        return "Invalid city name provided."
+        return 'Invalid city name provided.'
     if (
         not state
         or not isinstance(state, str)
         or len(state) != 2
         or not state.isalpha()
     ):
-        return "Invalid state code. Please provide the two-letter US state abbreviation (e.g., CA)."
+        return 'Invalid state code. Please provide the two-letter US state abbreviation (e.g., CA).'
 
     city_name = city.strip()
     state_code = state.strip().upper()
     # Construct a query likely to yield a US result
-    query = f"{city_name}, {state_code}, USA"
+    query = f'{city_name}, {state_code}, USA'
 
     # --- Geocoding ---
     location = None
@@ -228,5 +228,5 @@ async def shutdown_event():
     await http_client.aclose()
 
 
-if __name__ == "__main__":
-    mcp.run(transport="stdio")
+if __name__ == '__main__':
+    mcp.run(transport='stdio')

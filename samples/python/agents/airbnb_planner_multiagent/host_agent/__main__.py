@@ -1,5 +1,4 @@
-"""
-Copyright 2025 Google LLC
+"""Copyright 2025 Google LLC
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,9 +30,9 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 
-APP_NAME = "routing_app"
-USER_ID = "default_user"
-SESSION_ID = "default_session"
+APP_NAME = 'routing_app'
+USER_ID = 'default_user'
+SESSION_ID = 'default_session'
 
 SESSION_SERVICE = InMemorySessionService()
 ROUTING_AGENT_RUNNER = Runner(
@@ -52,63 +51,71 @@ async def get_response_from_agent(
         event_iterator: AsyncIterator[Event] = ROUTING_AGENT_RUNNER.run_async(
             user_id=USER_ID,
             session_id=SESSION_ID,
-            new_message=types.Content(role="user", parts=[types.Part(text=message)]),
+            new_message=types.Content(
+                role='user', parts=[types.Part(text=message)]
+            ),
         )
 
         async for event in event_iterator:
             if event.content and event.content.parts:
                 for part in event.content.parts:
                     if part.function_call:
-                        formatted_call = f"```python\n{pformat(part.function_call.model_dump(exclude_none=True), indent=2, width=80)}\n```"
+                        formatted_call = f'```python\n{pformat(part.function_call.model_dump(exclude_none=True), indent=2, width=80)}\n```'
                         yield gr.ChatMessage(
-                            role="assistant",
-                            content=f"🛠️ **Tool Call: {part.function_call.name}**\n{formatted_call}",
+                            role='assistant',
+                            content=f'🛠️ **Tool Call: {part.function_call.name}**\n{formatted_call}',
                         )
                     elif part.function_response:
                         response_content = part.function_response.response
                         if (
                             isinstance(response_content, dict)
-                            and "response" in response_content
+                            and 'response' in response_content
                         ):
-                            formatted_response_data = response_content["response"]
+                            formatted_response_data = response_content[
+                                'response'
+                            ]
                         else:
                             formatted_response_data = response_content
-                        formatted_response = f"```json\n{pformat(formatted_response_data, indent=2, width=80)}\n```"
+                        formatted_response = f'```json\n{pformat(formatted_response_data, indent=2, width=80)}\n```'
                         yield gr.ChatMessage(
-                            role="assistant",
-                            content=f"⚡ **Tool Response from {part.function_response.name}**\n{formatted_response}",
+                            role='assistant',
+                            content=f'⚡ **Tool Response from {part.function_response.name}**\n{formatted_response}',
                         )
             if event.is_final_response():
-                final_response_text = ""
+                final_response_text = ''
                 if event.content and event.content.parts:
-                    final_response_text = "".join(
+                    final_response_text = ''.join(
                         [p.text for p in event.content.parts if p.text]
                     )
                 elif event.actions and event.actions.escalate:
-                    final_response_text = f"Agent escalated: {event.error_message or 'No specific message.'}"
+                    final_response_text = f'Agent escalated: {event.error_message or "No specific message."}'
                 if final_response_text:
-                    yield gr.ChatMessage(role="assistant", content=final_response_text)
+                    yield gr.ChatMessage(
+                        role='assistant', content=final_response_text
+                    )
                 break
     except Exception as e:
-        print(f"Error in get_response_from_agent (Type: {type(e)}): {e}")
+        print(f'Error in get_response_from_agent (Type: {type(e)}): {e}')
         traceback.print_exc()  # This will print the full traceback
         yield gr.ChatMessage(
-            role="assistant",
-            content="An error occurred while processing your request. Please check the server logs for details.",
+            role='assistant',
+            content='An error occurred while processing your request. Please check the server logs for details.',
         )
 
 
 async def main():
     """Main gradio app."""
-    print("Creating ADK session...")
+    print('Creating ADK session...')
     await SESSION_SERVICE.create_session(
         app_name=APP_NAME, user_id=USER_ID, session_id=SESSION_ID
     )
-    print("ADK session created successfully.")
+    print('ADK session created successfully.')
 
-    with gr.Blocks(theme=gr.themes.Ocean(), title="A2A Host Agent with Logo") as demo:
+    with gr.Blocks(
+        theme=gr.themes.Ocean(), title='A2A Host Agent with Logo'
+    ) as demo:
         gr.Image(
-            "static/a2a.png",
+            'static/a2a.png',
             width=100,
             height=100,
             scale=0,
@@ -119,16 +126,17 @@ async def main():
         )
         gr.ChatInterface(
             get_response_from_agent,
-            title="A2A Host Agent",  # Title can be handled by Markdown above
-            description="This assistant can help you to check weather and find airbnb accommodation",
+            title='A2A Host Agent',  # Title can be handled by Markdown above
+            description='This assistant can help you to check weather and find airbnb accommodation',
         )
 
-    print("Launching Gradio interface...")
+    print('Launching Gradio interface...')
     demo.queue().launch(
-        server_name="0.0.0.0",
+        server_name='0.0.0.0',
         server_port=8083,
     )
-    print("Gradio application has been shut down.")
+    print('Gradio application has been shut down.')
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     asyncio.run(main())

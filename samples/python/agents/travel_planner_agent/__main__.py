@@ -1,5 +1,3 @@
-from agent_executor import TravelPlannerAgentExecutor
-
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
@@ -9,10 +7,10 @@ from a2a.types import (
     AgentCard,
     AgentSkill,
 )
+from agent_executor import TravelPlannerAgentExecutor
 
 
 if __name__ == '__main__':
-
     skill = AgentSkill(
         id='travel_planner',
         name='travel planner agent',
@@ -32,7 +30,6 @@ if __name__ == '__main__':
         skills=[skill],
         authentication=AgentAuthentication(schemes=['public']),
     )
-
 
     request_handler = DefaultRequestHandler(
         agent_executor=TravelPlannerAgentExecutor(),

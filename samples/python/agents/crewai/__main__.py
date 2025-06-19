@@ -31,8 +31,6 @@ logger = logging.getLogger(__name__)
 class MissingAPIKeyError(Exception):
     """Exception for missing API key."""
 
-    pass
-
 
 @click.command()
 @click.option('--host', 'host', default='localhost')
@@ -59,8 +57,12 @@ def main(host, port):
             tags=['generate image', 'edit image'],
             examples=['Generate a photorealistic image of raspberry lemonade'],
         )
-        
-        agent_host_url = os.getenv("HOST_OVERRIDE") if os.getenv("HOST_OVERRIDE") else f'http://{host}:{port}/'
+
+        agent_host_url = (
+            os.getenv('HOST_OVERRIDE')
+            if os.getenv('HOST_OVERRIDE')
+            else f'http://{host}:{port}/'
+        )
         agent_card = AgentCard(
             name='Image Generator Agent',
             description=(

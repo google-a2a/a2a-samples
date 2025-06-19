@@ -1,8 +1,9 @@
+import os
+
 from collections.abc import AsyncIterable
 from typing import Any, Literal
 
 import httpx
-import os
 
 from langchain_core.messages import AIMessage, ToolMessage
 from langchain_core.tools import tool
@@ -73,16 +74,16 @@ class CurrencyAgent:
     )
 
     def __init__(self):
-        model_source = os.getenv("model_source", "google")
-        if model_source == "google":
+        model_source = os.getenv('model_source', 'google')
+        if model_source == 'google':
             self.model = ChatGoogleGenerativeAI(model='gemini-2.0-flash')
         else:
             self.model = ChatOpenAI(
-                 model=os.getenv("TOOL_LLM_NAME"),
-                 openai_api_key=os.getenv("API_KEY", "EMPTY"),
-                 openai_api_base=os.getenv("TOOL_LLM_URL"),
-                 temperature=0
-             )
+                model=os.getenv('TOOL_LLM_NAME'),
+                openai_api_key=os.getenv('API_KEY', 'EMPTY'),
+                openai_api_base=os.getenv('TOOL_LLM_URL'),
+                temperature=0,
+            )
         self.tools = [get_exchange_rate]
 
         self.graph = create_react_agent(

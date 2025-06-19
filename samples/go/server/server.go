@@ -236,7 +236,7 @@ func (s *A2AServer) handleStreamingTask(w http.ResponseWriter, r *http.Request, 
 	}
 
 	// Create a channel to receive task updates
-	updates := make(chan interface{})
+	updates := make(chan any)
 
 	// Create a done channel to signal when the goroutine is finished
 	done := make(chan struct{})

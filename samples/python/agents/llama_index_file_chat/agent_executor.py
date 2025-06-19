@@ -1,15 +1,11 @@
-import asyncio
 import logging
 import traceback
 
-from typing import cast
-
 from a2a.server.agent_execution import AgentExecutor, RequestContext
-from a2a.server.events import Event, EventQueue
+from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import (
     FilePart,
-    FileWithBytes,
     InternalError,
     InvalidParamsError,
     Part,

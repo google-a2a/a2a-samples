@@ -1,34 +1,37 @@
-import httpx
 import asyncio
 
-from a2a.client import A2AClient
 from typing import Any
 from uuid import uuid4
+
+import httpx
+
+from a2a.client import A2AClient
 from a2a.types import (
     MessageSendParams,
     SendStreamingMessageRequest,
 )
 
+
 def print_welcome_message() -> None:
-    print("Welcome to the generic A2A client!")
+    print('Welcome to the generic A2A client!')
     print("Please enter your query (type 'exit' to quit):")
 
+
 def get_user_query() -> str:
-    return input("\n> ")
+    return input('\n> ')
+
 
 async def interact_with_server(client: A2AClient) -> None:
     while True:
         user_input = get_user_query()
         if user_input.lower() == 'exit':
-            print("bye!~")
+            print('bye!~')
             break
 
         send_message_payload: dict[str, Any] = {
             'message': {
                 'role': 'user',
-                'parts': [
-                    {'type': 'text', 'text': user_input}
-                ],
+                'parts': [{'type': 'text', 'text': user_input}],
                 'messageId': uuid4().hex,
             },
         }
@@ -39,10 +42,11 @@ async def interact_with_server(client: A2AClient) -> None:
             )
             stream_response = client.send_message_streaming(streaming_request)
             async for chunk in stream_response:
-                print(get_response_text(chunk),  end='', flush=True)
+                print(get_response_text(chunk), end='', flush=True)
                 await asyncio.sleep(0.1)
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(f'An error occurred: {e}')
+
 
 def get_response_text(chunk):
     data = chunk.model_dump(mode='json', exclude_none=True)

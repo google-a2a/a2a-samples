@@ -5,8 +5,11 @@ description = "MCP agent using A2A and AG2"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "ag2>=0.9.2",
-    "ag2[mcp, openai]>=0.9.2",
+    "ag2>=0.9.3",
+    "ag2[mcp, openai]>=0.9.3",
     "google-genai>=1.10.0",
-    "a2a-sdk>=0.2.6",  # After https://github.com/ag2ai/ag2/pull/1881, this pyproject can be added back in as a member of samples/python/pyproject.toml
+    "a2a-samples",
 ]
+
+[tool.uv.sources]
+a2a-samples = { workspace = true }
