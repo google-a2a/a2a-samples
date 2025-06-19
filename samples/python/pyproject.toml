@@ -3,19 +3,9 @@ name = "a2a-samples"
 version = "0.1.0"
 description = "Agent2Agent samples"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
-    "a2a-sdk>=0.2.6",
-    "httpx>=0.28.1",
-    "httpx-sse>=0.4.0",
-    "jwcrypto>=1.5.6",
-    "pydantic>=2.10.6",
-    "pyjwt>=2.10.1",
-    "sse-starlette>=2.2.1",
-    "starlette>=0.46.1",
-    "typing-extensions>=4.12.2",
-    "uvicorn>=0.34.0",
-    "veo-video-sample-agent",
+    "a2a-sdk",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -23,7 +13,6 @@ packages = ["common", "hosts"]
 
 [tool.uv.workspace]
 members = [
-    "agents/crewai",
     "agents/google_adk",
     "agents/marvin",
     "hosts/cli",
@@ -39,10 +28,6 @@ members = [
     "agents/dice_agent_grpc",
     "agents/ag2",
 ]
-
-[tool.uv.sources]
-veo-video-sample-agent = { workspace = true }
-a2a-sample-client-cli = { workspace = true }
 
 [build-system]
 requires = ["hatchling"]
