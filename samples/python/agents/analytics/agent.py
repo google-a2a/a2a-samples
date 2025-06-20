@@ -1,24 +1,26 @@
 import base64
-from io import BytesIO
-import os
 import logging
-from typing import Any, AsyncIterable
+
+from collections.abc import AsyncIterable
+from io import BytesIO
+from typing import Any
 from uuid import uuid4
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from PIL import Image
-from pydantic import BaseModel
 
-from utils import cache
 from crewai import Agent, Crew, Task
 from crewai.process import Process
 from crewai.tools import tool
 from dotenv import load_dotenv
+from pydantic import BaseModel
+from utils import cache
+
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
+
 
 class Imagedata(BaseModel):
     id: str | None = None
@@ -27,11 +29,11 @@ class Imagedata(BaseModel):
     bytes: str | None = None
     error: str | None = None
 
+
 @tool('ChartGenerationTool')
 def generate_chart_tool(prompt: str, session_id: str) -> str:
     """Generates a bar chart image from CSV-like input using matplotlib."""
-    logger.info(f">>>Chart tool called with prompt: {prompt}")
-
+    logger.info(f'>>>Chart tool called with prompt: {prompt}')
 
     if not prompt:
         raise ValueError('Prompt cannot be empty')
@@ -39,9 +41,12 @@ def generate_chart_tool(prompt: str, session_id: str) -> str:
     try:
         # Parse CSV-like input
         from io import StringIO
+
         df = pd.read_csv(StringIO(prompt))
         if df.shape[1] != 2:
-            raise ValueError('Input must have exactly two columns: Category and Value')
+            raise ValueError(
+                'Input must have exactly two columns: Category and Value'
+            )
         df.columns = ['Category', 'Value']
         df['Value'] = pd.to_numeric(df['Value'], errors='coerce')
         if df['Value'].isnull().any():
@@ -68,20 +73,22 @@ def generate_chart_tool(prompt: str, session_id: str) -> str:
             name='generated_chart.png',
             id=uuid4().hex,
         )
-        
-        logger.info(f"Caching image with ID: {data.id} for session: {session_id}")
+
+        logger.info(
+            f'Caching image with ID: {data.id} for session: {session_id}'
+        )
 
         # Cache image
         session_data = cache.get(session_id) or {}
         session_data[data.id] = data
         cache.set(session_id, session_data)
 
-
         return data.id
 
     except Exception as e:
         logger.error(f'Error generating chart: {e}')
         return -999999999
+
 
 class ChartGenerationAgent:
     SUPPORTED_CONTENT_TYPES = ['text', 'text/plain', 'image/png']
@@ -108,7 +115,6 @@ class ChartGenerationAgent:
             agent=self.chart_creator_agent,
         )
 
-
         self.chart_crew = Crew(
             agents=[self.chart_creator_agent],
             tasks=[self.chart_creation_task],
@@ -120,8 +126,10 @@ class ChartGenerationAgent:
 
     def invoke(self, query, session_id: str | None = None) -> str:
         # Normalize or generate session_id
-        session_id = session_id or f"session-{uuid.uuid4().hex}"
-        logger.info(f"[invoke] Using session_id: {session_id} for query: {query}")
+        session_id = session_id or f'session-{uuid.uuid4().hex}'
+        logger.info(
+            f'[invoke] Using session_id: {session_id} for query: {query}'
+        )
 
         inputs = {
             'user_prompt': query,
@@ -129,23 +137,29 @@ class ChartGenerationAgent:
         }
 
         response = self.chart_crew.kickoff(inputs)
-        logger.info(f"[invoke] Chart tool returned image ID: {response}")
+        logger.info(f'[invoke] Chart tool returned image ID: {response}')
         return response
 
     async def stream(self, query: str) -> AsyncIterable[dict[str, Any]]:
         raise NotImplementedError('Streaming is not supported.')
 
     def get_image_data(self, session_id: str, image_key: str) -> Imagedata:
-
         session_data = cache.get(session_id)
 
         if not session_data:
-            logger.error(f"[get_image_data] No session data for session_id: {session_id}")
-            return Imagedata(error=f'No session data found for session_id: {session_id}')
+            logger.error(
+                f'[get_image_data] No session data for session_id: {session_id}'
+            )
+            return Imagedata(
+                error=f'No session data found for session_id: {session_id}'
+            )
 
         if image_key not in session_data:
-            logger.error(f"[get_image_data] Image key {image_key} not found in session data")
-            return Imagedata(error=f'Image ID {image_key} not found in session {session_id}')
+            logger.error(
+                f'[get_image_data] Image key {image_key} not found in session data'
+            )
+            return Imagedata(
+                error=f'Image ID {image_key} not found in session {session_id}'
+            )
 
         return session_data[image_key]
-

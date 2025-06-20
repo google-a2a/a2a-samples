@@ -4,6 +4,7 @@ from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.server.tasks import TaskUpdater
 from a2a.types import TaskState, TextPart, UnsupportedOperationError
+from a2a.utils import new_agent_text_message
 from a2a.utils.errors import ServerError
 from google.adk import Runner
 from google.adk.agents import LlmAgent
@@ -57,9 +58,9 @@ class QnAAgentExecutor(AgentExecutor):
         updater = TaskUpdater(event_queue, context.task_id, context.context_id)
 
         if not context.current_task:
-            updater.submit()
+            await updater.submit()
 
-        updater.start_work()
+        await updater.start_work()
 
         content = types.Content(role='user', parts=[types.Part(text=query)])
         session = await self.runner.session_service.get_session(
@@ -81,20 +82,20 @@ class QnAAgentExecutor(AgentExecutor):
                 text_parts = [
                     TextPart(text=part.text) for part in parts if part.text
                 ]
-                updater.add_artifact(
+                await updater.add_artifact(
                     text_parts,
                     name='result',
                 )
-                updater.complete()
+                await updater.complete()
                 break
-            else:
-                updater.update_status(
-                    TaskState.working,
-                    message=updater.new_text_message('Working...'),
-                )
+            await updater.update_status(
+                TaskState.working, message=new_agent_text_message('Working...')
+            )
         else:
             logger.debug('Agent failed to complete')
-            updater.update_status(
+            await updater.update_status(
                 TaskState.failed,
-                message=updater.new_text_message('Failed to generate a response.'),
+                message=new_agent_text_message(
+                    'Failed to generate a response.'
+                ),
             )

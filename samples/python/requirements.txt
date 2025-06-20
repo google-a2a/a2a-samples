@@ -1,2 +1,2 @@
-a2a-sdk>=latest
-uvicorn>=latest
+a2a-sdk
+uvicorn

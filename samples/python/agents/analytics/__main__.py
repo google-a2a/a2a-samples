@@ -5,7 +5,6 @@ and starts the server to handle incoming requests. Notice the agent runs on port
 """
 
 import logging
-import os
 
 import click
 
@@ -28,21 +27,21 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-
 @click.command()
 @click.option('--host', 'host', default='localhost')
 @click.option('--port', 'port', default=10011)
 def main(host, port):
     """Entry point for the A2A Chart Generation Agent."""
-
     try:
         capabilities = AgentCapabilities(streaming=False)
         skill = AgentSkill(
-            id='image_generator',
-            name='Image Generator',
+            id='chart_generator',
+            name='Chart Generator',
             description='Generate a chart based on CSV-like data passed in',
             tags=['generate image', 'edit image'],
-            examples=['Generate a photorealistic image of raspberry lemonade'],
+            examples=[
+                'Generate a chart of revenue: Jan,$1000 Feb,$2000 Mar,$1500'
+            ],
         )
 
         agent_card = AgentCard(
@@ -66,6 +65,7 @@ def main(host, port):
         )
 
         import uvicorn
+
         uvicorn.run(server.build(), host=host, port=port)
 
     except Exception as e:

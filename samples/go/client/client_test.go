@@ -219,7 +219,6 @@ func TestErrorResponse(t *testing.T) {
 func TestSendTaskStreaming(t *testing.T) {
 	// Create a channel to signal when all events have been sent
 	done := make(chan struct{})
-
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Verify request headers
 		if r.Header.Get("Accept") != "text/event-stream" {
@@ -289,7 +288,7 @@ func TestSendTaskStreaming(t *testing.T) {
 		},
 	}
 
-	eventChan := make(chan interface{})
+	eventChan := make(chan any)
 	errChan := make(chan error, 1)
 
 	// Start streaming
@@ -304,9 +303,8 @@ func TestSendTaskStreaming(t *testing.T) {
 		// The event should be a json.RawMessage that we need to unmarshal into a Task
 		rawMsg, ok := event.(json.RawMessage)
 		if !ok {
-			t.Fatal("expected event to be a json.RawMessage")
+			t.Fatalf("expected event to be a json.RawMessage, but was %v with type %T", event, event)
 		}
-
 		var task models.Task
 		if err := json.Unmarshal(rawMsg, &task); err != nil {
 			t.Fatalf("failed to unmarshal task: %v", err)
