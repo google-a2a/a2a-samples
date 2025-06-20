@@ -24,7 +24,7 @@ packages = ["common", "hosts"]
 [tool.uv.workspace]
 members = [
     "agents/crewai",
-    "agents/google_adk",
+    "agents/adk_expense_reimbursement",
     "agents/marvin",
     "hosts/cli",
     "hosts/cli_auth",
