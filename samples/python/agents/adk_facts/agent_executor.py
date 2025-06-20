@@ -39,16 +39,30 @@ class ADKAgentExecutor(AgentExecutor):
             memory_service=InMemoryMemoryService(),
         )
 
-    async def cancel(self, task_id: str) -> None:
+    async def cancel(
+        self,
+        context: RequestContext,
+        event_queue: EventQueue,
+    ) -> None:
         """Cancel the execution of a specific task."""
-        # Implementation for cancelling tasks
+        raise NotImplementedError(
+            "Cancellation is not implemented for ADKAgentExecutor."
+        )
 
-    async def execute(self, context: RequestContext, event_queue: EventQueue) -> None:
+    async def execute(
+        self,
+        context: RequestContext,
+        event_queue: EventQueue,
+    ) -> None:
         query = context.get_user_input()
         task = context.current_task or new_task(context.message)
         await event_queue.enqueue_event(task)
 
         updater = TaskUpdater(event_queue, task.id, task.contextId)
+        if context.call_context:
+            user_id = context.call_context.user.user_name
+        else:
+            user_id = "a2a_user"
 
         try:
             # Update status with custom message
@@ -60,7 +74,7 @@ class ADKAgentExecutor(AgentExecutor):
             # Process with ADK agent
             session = await self.runner.session_service.create_session(
                 app_name=self.agent.name,
-                user_id="a2a_user",
+                user_id=user_id,
                 state={},
                 session_id=task.contextId,
             )
@@ -71,7 +85,7 @@ class ADKAgentExecutor(AgentExecutor):
 
             response_text = ""
             async for event in self.runner.run_async(
-                user_id="a2a_user", session_id=session.id, new_message=content
+                user_id=user_id, session_id=session.id, new_message=content
             ):
                 if event.is_final_response() and event.content and event.content.parts:
                     for part in event.content.parts:
