@@ -1,37 +1,25 @@
-import asyncio
-
-import uvicorn
-
 from a2a.server.agent_execution import AgentExecutor, RequestContext
-from a2a.server.apps import A2AStarletteApplication
 from a2a.server.events import EventQueue
-from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.server.tasks import InMemoryTaskStore, TaskUpdater
+from a2a.server.tasks import TaskUpdater
 from a2a.types import (
-    AgentCapabilities,
-    AgentCard,
-    AgentSkill,
-    MessageSendParams,
     Part,
     TaskState,
     TextPart,
 )
 from a2a.utils import new_agent_text_message, new_task
-from google.adk.agents import Agent
 from google.adk.artifacts import InMemoryArtifactService
 from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
-from google.adk.tools import google_search
 from google.genai import types
-
-
-# Generic A2A Executor for any ADK agent
 
 
 class ADKAgentExecutor(AgentExecutor):
     def __init__(
-        self, agent, status_message="Processing request...", artifact_name="response"
+        self,
+        agent,
+        status_message="Processing request...",
+        artifact_name="response",
     ):
         """Initialize a generic ADK agent executor.
 
@@ -95,7 +83,8 @@ class ADKAgentExecutor(AgentExecutor):
 
             # Add response as artifact with custom name
             await updater.add_artifact(
-                [Part(root=TextPart(text=response_text))], name=self.artifact_name
+                [Part(root=TextPart(text=response_text))],
+                name=self.artifact_name,
             )
 
             await updater.complete()

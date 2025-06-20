@@ -1,34 +1,21 @@
-import asyncio
 import logging
 import os
 
 import click
 import uvicorn
 
-from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.apps import A2AStarletteApplication
-from a2a.server.events import EventQueue
 from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.server.tasks import InMemoryTaskStore, TaskUpdater
+from a2a.server.tasks import InMemoryTaskStore
 from a2a.types import (
     AgentCapabilities,
     AgentCard,
     AgentSkill,
-    MessageSendParams,
-    Part,
-    TaskState,
-    TextPart,
 )
-from a2a.utils import new_agent_text_message, new_task
 from agent_executor import ADKAgentExecutor
 from dotenv import load_dotenv
 from google.adk.agents import Agent
-from google.adk.artifacts import InMemoryArtifactService
-from google.adk.memory.in_memory_memory_service import InMemoryMemoryService
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
 from google.adk.tools import google_search
-from google.genai import types
 
 
 load_dotenv()
@@ -45,11 +32,6 @@ class MissingAPIKeyError(Exception):
 @click.option("--host", default="localhost")
 @click.option("--port", default=10002)
 def main(host, port):
-    if not os.getenv("GOOGLE_API_KEY"):
-        raise MissingAPIKeyError(
-            "GOOGLE_API_KEY environment variable not set and GOOGLE_GENAI_USE_VERTEXAI is not TRUE."
-        )
-
     facts_agent = Agent(
         name="facts_agent",
         model="gemini-2.5-flash-lite-preview-06-17",
@@ -62,7 +44,7 @@ def main(host, port):
     agent_card = AgentCard(
         name=facts_agent.name,
         description=facts_agent.description,
-        url=f"http://{HOST}:{PORT}/",
+        url="https://sample-a2a-agent-908687846511.us-central1.run.app/",
         version="1.0.0",
         defaultInputModes=["text", "text/plain"],
         defaultOutputModes=["text", "text/plain"],
