@@ -8,12 +8,14 @@ To interact with the servers, use an A2AClient in a host app (such as the CLI). 
 
 ## Agents Directory
 
-* [**Google ADK**](/samples/python/agents/google_adk/README.md)  
+* [**Google ADK Facts**](/samples/python/agents/adk-facts/README.md)  
+Sample agent to give fun facts using Grounding with Google Search and ADK
+
+* [**Google ADK Expense Reimbursement**](/samples/python/agents/adk-expense-reimbursement/README.md)  
 Sample agent to (mock) fill out expense reports. Showcases multi-turn interactions and returning/replying to webforms through A2A.
 
 * [**AG2 MCP Agent with A2A Protocol**](/samples/python/agents/ag2/README.md)  
 Demonstrates an MCP-enabled agent built with [AG2](https://github.com/ag2ai/ag2) that is exposed through the A2A protocol.
-
 
 * [**Azure AI Foundry Agent Service**](/samples/python/agents/azureaifoundry_sdk/README.md)  
 Sample agent build with [Azure AI Foundry Agent Service](https://learn.microsoft.com/en-us/azure/ai-services/agents/overview)
