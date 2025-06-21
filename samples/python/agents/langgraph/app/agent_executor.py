@@ -43,7 +43,7 @@ class CurrencyAgentExecutor(AgentExecutor):
         query = context.get_user_input()
         task = context.current_task
         if not task:
-            task = new_task(context.message)
+            task = new_task(context.message) # type: ignore
             await event_queue.enqueue_event(task)
         updater = TaskUpdater(event_queue, task.id, task.contextId)
         try:
@@ -87,6 +87,6 @@ class CurrencyAgentExecutor(AgentExecutor):
         return False
 
     async def cancel(
-        self, request: RequestContext, event_queue: EventQueue
-    ) -> Task | None:
+        self, context: RequestContext, event_queue: EventQueue
+    ) -> None:
         raise ServerError(error=UnsupportedOperationError())
