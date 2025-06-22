@@ -436,7 +436,10 @@ public class DemoAgentExecutor implements AgentExecutor {
      * @return a Message object representing an agent response
      */
     private Message createAgentMessage(String content) {
-        return Message.builder().role("agent").parts(List.of(TextPart.builder().text(content).build())).build();
-    }
+        return Message.builder()
+                .messageId(java.util.UUID.randomUUID().toString())
+                .role("agent")
+                .parts(List.of(TextPart.builder().text(content).build()))
+                .build();    }
 
 }
