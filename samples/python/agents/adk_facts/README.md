@@ -1,8 +1,6 @@
 # ADK Agent
 
-This sample uses the Agent Development Kit (ADK) to create a simple "Expense Reimbursement" agent that is hosted as an A2A server.
-
-This agent takes text requests from the client and, if any details are missing, returns a webform for the client (or its user) to fill out. After the client fills out the form, the agent will complete the task.
+This sample uses the Agent Development Kit (ADK) to create a simple fun facts generator which communicates using A2A.
 
 ## Prerequisites
 
@@ -15,7 +13,7 @@ This agent takes text requests from the client and, if any details are missing, 
 1. Navigate to the samples directory:
 
     ```bash
-    cd samples/python/agents/google_adk
+    cd samples/python/agents/adk_facts
     ```
 
 2. Create an environment file with your API key:
@@ -28,17 +26,6 @@ This agent takes text requests from the client and, if any details are missing, 
 
     ```bash
     uv run .
-    ```
-
-4. In a separate terminal, run the A2A client:
-
-    ```sh
-    # Connect to the agent (specify the agent URL with correct port)
-    cd samples/python/hosts/cli
-    uv run . --agent http://localhost:10002
-
-    # If you changed the port when starting the agent, use that port instead
-    # uv run . --agent http://localhost:YOUR_PORT
     ```
 
 ## Deploy to Google Cloud Run
