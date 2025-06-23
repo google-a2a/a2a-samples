@@ -1,15 +1,17 @@
 package com.google.a2a.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-/**
- * FileContent represents either bytes or URI-based file content
- */
-@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.DEDUCTION
+)
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = FileContentBytes.class),
-    @JsonSubTypes.Type(value = FileContentURI.class)
+    @JsonSubTypes.Type(value = FileWithBytes.class),
+    @JsonSubTypes.Type(value = FileWithUri.class)
 })
-public sealed interface FileContent permits FileContentBytes, FileContentURI {
-} 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public sealed interface FileContent
+    permits FileWithBytes, FileWithUri {
+}
