@@ -181,7 +181,7 @@ Here are example questions:
 - "Please find a room in LA, CA, June 20-25, 2025, two adults"
 
 ## References
-- https://github.com/google-a2a/a2a-samples/blob/main/samples/python/agents/airbnb_planner_multiagent
+- https://github.com/a2aproject/a2a-samples/blob/main/samples/python/agents/airbnb_planner_multiagent
 - https://github.com/google/a2a-python
 - https://codelabs.developers.google.com/intro-a2a-purchasing-concierge#1
 - https://google.github.io/adk-docs/
