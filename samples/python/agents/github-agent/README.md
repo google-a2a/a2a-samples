@@ -42,7 +42,7 @@ All functions include error handling and support optional parameters for filteri
 
 ```bash
 # Clone the repository
-git clone https://github.com/google-a2a/a2a-samples.git
+git clone https://github.com/a2aproject/a2a-samples.git
 cd a2a-samples/samples/python/agents/github-agent
 
 # Create virtual environment
@@ -92,7 +92,7 @@ You can test the GitHub agent using the A2A Movie Agent client:
 
 ```bash
 # Clone the A2A samples if you haven't already
-git clone https://github.com/google-a2a/a2a-samples.git
+git clone https://github.com/a2aproject/a2a-samples.git
 
 cd a2a-samples/samples/python/hosts/cli/
 # run cli
@@ -144,4 +144,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🔗 Related Projects
 
-- [A2A SDK](https://github.com/google-a2a/a2a-python) - The underlying A2A protocol implementation
+- [A2A SDK](https://github.com/a2aproject/a2a-python) - The underlying A2A protocol implementation

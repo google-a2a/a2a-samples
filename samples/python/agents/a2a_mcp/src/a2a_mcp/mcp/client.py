@@ -11,7 +11,7 @@ from fastmcp.utilities.logging import get_logger
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.sse import sse_client
 from mcp.client.stdio import stdio_client
-from mcp.types import CallToolRequest, ReadResourceResult
+from mcp.types import CallToolResult, ReadResourceResult
 
 
 logger = get_logger(__name__)
@@ -79,7 +79,7 @@ async def init_session(host, port, transport):
         )
 
 
-async def find_agent(session: ClientSession, query) -> CallToolRequest:
+async def find_agent(session: ClientSession, query) -> CallToolResult:
     """Calls the 'find_agent' tool on the connected MCP server.
 
     Args:
@@ -112,7 +112,7 @@ async def find_resource(session: ClientSession, resource) -> ReadResourceResult:
     return await session.read_resource(resource)
 
 
-async def search_flights(session: ClientSession) -> CallToolRequest:
+async def search_flights(session: ClientSession) -> CallToolResult:
     """Calls the 'search_flights' tool on the connected MCP server.
 
     Args:
@@ -134,7 +134,7 @@ async def search_flights(session: ClientSession) -> CallToolRequest:
     )
 
 
-async def search_hotels(session: ClientSession) -> CallToolRequest:
+async def search_hotels(session: ClientSession) -> CallToolResult:
     """Calls the 'search_hotels' tool on the connected MCP server.
 
     Args:
@@ -155,7 +155,7 @@ async def search_hotels(session: ClientSession) -> CallToolRequest:
     )
 
 
-async def query_db(session: ClientSession) -> CallToolRequest:
+async def query_db(session: ClientSession) -> CallToolResult:
     """Calls the 'query' tool on the connected MCP server.
 
     Args:
