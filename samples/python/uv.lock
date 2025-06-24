@@ -38,7 +38,7 @@ requires-dist = [
 [[package]]
 name = "a2a-sample-agent-adk"
 version = "0.1.0"
-source = { editable = "agents/google_adk" }
+source = { editable = "agents/adk_expense_reimbursement" }
 dependencies = [
     { name = "a2a-samples" },
     { name = "click" },
