@@ -132,13 +132,4 @@ AZURE_AI_AGENT_MODEL_DEPLOYMENT_NAME=Your Azure AI Foundry Deployment Model Name
 - Create agents that interact with real-time APIs
 - Understand complex multi-service architecture
 
-### Use Multi-Agent System when you want to:
-- Build sophisticated multi-agent architectures
-- Implement intelligent task routing and delegation
-- Coordinate multiple specialized agents
-- Use Semantic Kernel for advanced agent capabilities
-- Create web-based agent interfaces with Gradio
-- Combine multiple communication protocols (STDIO, SSE, A2A)
-- Build production-scale agent orchestration systems
 
-Both examples provide complete implementations with detailed documentation and are ready for extension and customization.
