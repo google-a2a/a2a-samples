@@ -9,13 +9,14 @@
 > You need to modify the values corresponding to model_name and base_url.
 
 ```json
-
 {
-  "model_name":"qwen3-32b",
+  "model_name":"qwen3-32b", //defaults to gpt-4o if empty
   "api_key": "API_KEY",
-  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1" //defaults to ChatGPT if empty
 }
 ```
+
+
 
 2. Create an environment file with your API key:
 > You need to set the value corresponding to API_KEY.
