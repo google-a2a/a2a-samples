@@ -1,5 +1,4 @@
 import logging
-import os
 
 import click
 import uvicorn
@@ -12,10 +11,9 @@ from a2a.types import (
     AgentCard,
     AgentSkill,
 )
+from agent import root_agent as facts_agent
 from agent_executor import ADKAgentExecutor
 from dotenv import load_dotenv
-from google.adk.agents import Agent
-from google.adk.tools import google_search
 
 
 load_dotenv()
@@ -32,13 +30,6 @@ class MissingAPIKeyError(Exception):
 @click.option("--host", default="localhost")
 @click.option("--port", default=10002)
 def main(host, port):
-    facts_agent = Agent(
-        name="facts_agent",
-        model="gemini-2.5-flash-lite-preview-06-17",
-        description=("Agent to give interesting facts."),
-        instruction=("You are a helpful agent who can provide interesting facts."),
-        tools=[google_search],
-    )
 
     # Agent card (metadata)
     agent_card = AgentCard(
