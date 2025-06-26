@@ -6,6 +6,7 @@ This repository contains code samples and demos which use the [Agent2Agent (A2A)
 
 - [A2A](https://github.com/a2aproject/A2A) - A2A Specification and documentation.
 - [a2a-python](https://github.com/a2aproject/a2a-python) - A2A Python SDK.
+- [a2a-inspector](https://github.com/a2aproject/a2a-inspector) - UI tool for inspecting A2A enabled agents.
 
 ## Contributing
 
