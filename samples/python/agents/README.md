@@ -8,12 +8,14 @@ To interact with the servers, use an A2AClient in a host app (such as the CLI). 
 
 ## Agents Directory
 
-* [**Google ADK**](/samples/python/agents/google_adk/README.md)  
+* [**Google ADK Facts**](/samples/python/agents/adk-facts/README.md)  
+Sample agent to give fun facts using Grounding with Google Search and ADK
+
+* [**Google ADK Expense Reimbursement**](/samples/python/agents/adk-expense-reimbursement/README.md)  
 Sample agent to (mock) fill out expense reports. Showcases multi-turn interactions and returning/replying to webforms through A2A.
 
 * [**AG2 MCP Agent with A2A Protocol**](/samples/python/agents/ag2/README.md)  
 Demonstrates an MCP-enabled agent built with [AG2](https://github.com/ag2ai/ag2) that is exposed through the A2A protocol.
-
 
 * [**Azure AI Foundry Agent Service**](/samples/python/agents/azureaifoundry_sdk/README.md)  
 Sample agent build with [Azure AI Foundry Agent Service](https://learn.microsoft.com/en-us/azure/ai-services/agents/overview)
@@ -38,3 +40,11 @@ Demonstrates how to implement a travel agent built on [Semantic Kernel](https://
 
 * [**travel planner Agent**](/samples/python/agents/travel_planner_agent/README.md)  
  A travel assistant demo implemented based on Google's official [a2a-python](https://github.com/google/a2a-python) SDK, And Implemented through the A2A protocol.
+
+
+## Disclaimer
+Important: The sample code provided is for demonstration purposes and illustrates the mechanics of the Agent-to-Agent (A2A) protocol. When building production applications, it is critical to treat any agent operating outside of your direct control as a potentially untrusted entity.
+
+All data received from an external agent—including but not limited to its AgentCard, messages, artifacts, and task statuses—should be handled as untrusted input. For example, a malicious agent could provide an AgentCard containing crafted data in its fields (e.g., description, name, skills.description). If this data is used without sanitization to construct prompts for a Large Language Model (LLM), it could expose your application to prompt injection attacks.  Failure to properly validate and sanitize this data before use can introduce security vulnerabilities into your application.
+
+Developers are responsible for implementing appropriate security measures, such as input validation and secure handling of credentials to protect their systems and users.
